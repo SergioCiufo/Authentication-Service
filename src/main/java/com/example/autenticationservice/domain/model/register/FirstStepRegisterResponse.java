@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegisterResponse {
+public class FirstStepRegisterResponse {
     private String message;
 }

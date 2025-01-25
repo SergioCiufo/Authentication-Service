@@ -154,12 +154,6 @@ paths:
               schema:
                 type: object
                 properties:
-                  id:
-                    type: integer
-                    example: "1"  #ID utente associato al token
-                  name:
-                    type: string
-                    example: "name" 
                   username:
                     type: string
         '401':

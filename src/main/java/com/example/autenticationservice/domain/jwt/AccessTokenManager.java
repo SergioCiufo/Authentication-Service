@@ -15,7 +15,7 @@ import java.security.Key;
 import java.util.Date;
 
 @Component
-public class AccessTokenManagerToken extends TokenCookieManager {
+public class AccessTokenManager extends TokenCookieManager {
 
     @Value("${spring.app.jwtSecret}")
     private String jwtSecret;
@@ -64,7 +64,7 @@ public class AccessTokenManagerToken extends TokenCookieManager {
         return ResponseCookie.from(jwtAccessCookie, token)
                 .path(path)
                 .maxAge(jwtAccessExpireMs/1000) //convertito in secondi
-                .httpOnly(true)
+                .httpOnly(true) //evitiamo manimolazioni javascript
                 .secure(false) //non usiamo https
                 .build();
     }

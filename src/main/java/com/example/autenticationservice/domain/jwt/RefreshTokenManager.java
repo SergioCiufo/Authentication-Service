@@ -64,7 +64,7 @@ public class RefreshTokenManager extends TokenCookieManager {
         return ResponseCookie.from(jwtRefreshCookie, token)
                 .path(path)
                 .maxAge(jwtRefreshExpireMs/1000) //convertito in secondi
-                .httpOnly(true)
+                .httpOnly(true) //evitiamo manimolazioni javascript
                 .secure(false) //non usiamo https
                 .build();
     }

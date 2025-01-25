@@ -1,6 +1,5 @@
 package com.example.autenticationservice.domain.jwt;
 
-import com.example.autenticationservice.domain.model.User;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -11,12 +10,10 @@ import org.springframework.http.ResponseCookie;
 
 import java.security.Key;
 
-public abstract class CookieManager {
+public abstract class TokenCookieManager {
 
-    private final Logger logger = LoggerFactory.getLogger(CookieManager.class);
+    private final Logger logger = LoggerFactory.getLogger(TokenCookieManager.class);
 
-    protected String cookieName;
-    protected int cookieExpireTime;
     protected String path = "api/";
 
     //Genera un nuovo JWT per il nome utente specificato
@@ -35,17 +32,12 @@ public abstract class CookieManager {
 
     //Crea un cookie vuoto per rimuovere il JWT
     //Viene utilizzato quando è necessario eliminare il JWT memorizzato nel client
-    public ResponseCookie getCleanJwtCookie(){
-        return ResponseCookie.from(cookieName, null)
-                .path(path)
-                .maxAge(0)
-                .build();
-    }
+    public abstract ResponseCookie getCleanJwtCookie();
 
     //Verifica la validità del token JWT fornito
     //Gestisce eccezioni per token malformati, scaduti, non supportati o con argomenti non validi
     //Restituisce true se il token è valido, altrimenti registra un errore specifico e restituisce false
-    public boolean validateToken(String authToken) {
+    public boolean validateToken(String authToken) throws ExpiredJwtException { //facciamo salire l'ExpiredJwtException per lavorarci
         try {
             Jwts.parserBuilder().setSigningKey(key()).build().parse(authToken);
             return true;
@@ -53,6 +45,7 @@ public abstract class CookieManager {
             logger.error("Invalid JWT token: {}", e.getMessage());
         } catch (ExpiredJwtException e) {
             logger.error("JWT token is expired: {}", e.getMessage());
+            throw e;
         } catch (UnsupportedJwtException e) {
             logger.error("JWT token is unsupported: {}", e.getMessage());
         } catch (IllegalArgumentException e) {

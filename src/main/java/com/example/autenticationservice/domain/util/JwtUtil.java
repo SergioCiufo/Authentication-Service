@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
-public class JwtUtil2 {
+public class JwtUtil {
 
     private final AccessTokenManager accessTokenManager;
     private final RefreshTokenManager refreshTokenManager;
