@@ -57,4 +57,12 @@ public class AutenticationServiceExceptionHandler {
                 .body(ex.getMessage());
     }
 
+    @ExceptionHandler({InvalidSessionException.class})
+    public ResponseEntity<Object> handleInvalidSessionException(InvalidSessionException ex, WebRequest request) {
+        logError(ex, request);
+        return ResponseEntity
+                .status(401)
+                .body(ex.getMessage());
+    }
+
 }

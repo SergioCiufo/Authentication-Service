@@ -30,8 +30,7 @@ public class VerifyTokenImpl implements VerifyTokenService {
 
         if (accessToken == null || accessToken.isEmpty()) {
             logger.error("Access token mancante");
-            return null;
-            //todo
+            throw new MissingTokenException("Token mancante o inesistente");
         }
 
         logger.info("Access token: {}",accessToken);
@@ -63,8 +62,17 @@ public class VerifyTokenImpl implements VerifyTokenService {
             ResponseCookie newAccessToken = jwtUtil.generateAccessToken(username);
 
             response.addCookie(new Cookie(newAccessToken.getName(), newAccessToken.getValue()));
+            //L'errore si verifica perché il codice tenta di recuperare il nuovo access token dal cookie,
+            //ma il cookie aggiornato non è ancora stato effettivamente letto nella richiesta corrente.
+            // Questo accade perché l'aggiornamento del cookie viene inviato nella risposta e non è disponibile immediatamente nella richiesta corrente.
+            //Per risolvere questo problema, invece di rileggere immediatamente il token dal cookie,
+            //assegnamo direttamente il nuovo token generato (newAccessToken) a una variabile e utilizzarlo per continuare il flusso.
 
-            accessToken = jwtUtil.getAccessJwtFromCookie(request);
+            //si schiantava
+            //accessToken = jwtUtil.getAccessJwtFromCookie(request);
+
+            //utilizziamo direttamente il nuovo token generato //funziona
+            accessToken =  newAccessToken.getValue();
         }
 
         String username = jwtUtil.getUsernameFromAccessToken(accessToken);

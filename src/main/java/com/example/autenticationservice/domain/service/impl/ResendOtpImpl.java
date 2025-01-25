@@ -1,5 +1,6 @@
 package com.example.autenticationservice.domain.service.impl;
 
+import com.example.autenticationservice.domain.exceptions.InvalidSessionException;
 import com.example.autenticationservice.domain.model.ResendOtp.FirstStepResendOtpResponse;
 import com.example.autenticationservice.domain.model.User;
 import com.example.autenticationservice.domain.service.EmailService;
@@ -60,9 +61,13 @@ public class ResendOtpImpl implements ResendOtpService {
                 .filter(u -> u.getUsername().equals(username))
                 .findFirst();
 
-        String email = user.get().getEmail();
-
-        emailService.sendEmail(email, newOtp);
+        if (user.isPresent()) {
+            String email = user.get().getEmail();
+            emailService.sendEmail(email, newOtp);
+        } else {
+            logger.warn("Utente non trovato per username: {}", username);
+            throw new InvalidSessionException("Utente non valido o inesistente");
+        }
 
         return FirstStepResendOtpResponse.builder()
                 .message("Nuovo Otp inviato")
