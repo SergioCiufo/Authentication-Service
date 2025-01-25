@@ -1,0 +1,256 @@
+openapi: 3.0.3
+info:
+  title: Chat4Me
+  description: |
+    Chat4Me è un'app di messaggistica basata su microservizi, sviluppata con SpringBoot, progettata per interagire tramite API Rest.
+    - Servizio Messaggistica per la lettura/scrittura messaggi
+    - Servizio di autenticazione tramite SSO e Token autorizzativi
+  version: 1.0.0
+
+tags:
+  - name: Servizio Autenticazione
+    description: Registrazione, login con OTP e gestione dei token di autenticazione
+    
+components:
+  securitySchemes:
+    bearerAuth:
+      description: Autenticazione tramite Bearer Token (JWT). Il token deve essere passato nell'header `Authorization` con il formato `Bearer <token>`. 
+        Usato per verificare l'identità dell'utente e autorizzare l'accesso alle risorse protette. 
+        Il token scade dopo un certo periodo, per rinnovarlo usa il refresh token.
+      type: http
+      scheme: bearer
+      bearerFormat: JWT  # Facoltativo, specifica che si tratta di un JWT    
+
+paths:
+ 
+  /register:
+    post:
+      tags:
+        - Servizio Autenticazione
+      summary: Registrazione nuovo utente
+      description: Registrazione di un nuovo utente nel sistema.
+      operationId: register
+      requestBody:
+        description: Dati necessari per la registrazione dell'utente
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "name"
+                username:
+                  type: string
+                  example: "username"
+                password:
+                  type: string
+                  example: "password"
+                email:
+                  type: string
+                  example: "example@example.ex"
+      responses:
+        '200':
+          description: Registrazione effettuata con successo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Registrazione effettuata con successo"
+        '401':
+          description: Dati di registrazione non validi (username o email già esistente)
+
+  /login:
+    post:
+      tags:
+        - Servizio Autenticazione
+      summary: Login con OTP
+      description: Restituisce un OTP dopo una corretta autenticazione con username e password
+      operationId: getOTP
+      requestBody:
+        description: Dati di login dell'utente
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "username"
+                password:
+                  type: string
+                  example: "password"
+      responses:
+        '200':
+          description: OTP inviato con successo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionOtp:
+                    type: string
+                    example: "sessionOTP"  # sessionOtp non visibile all'utente
+                  message:
+                    type: string
+                    example: "OTP inviato con successo tramite mail o console"
+        '401':
+          description: Autenticazione fallita (credenziali non valide)
+
+  /verify-otp:
+    post:
+      tags:
+        - Servizio Autenticazione
+      summary: Verifica OTP
+      description: Verifica l'OTP inviato tramite email ed il sessionOTP e restituisce un token JWT se valido.
+      operationId: verifyOTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                otp:
+                  type: string
+                  example: "OTP by mail"  # OTP inviato via email
+                sessionOtp:
+                  type: string
+                  example: "sessionOTP"  # sessionOtp associato alla sessione dell'utente
+      responses:
+        '200':
+          description: OTP verificato con successo, token JWT generato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: "macarenaToken."  # Il JWT token
+        '401':
+          description: Accesso non autorizzato (OTP o sessionOTP errato/scaduto o non valido)
+  
+  /verify-token:
+    post:
+      tags:
+        - Servizio Autenticazione
+      summary: Verifica il token JWT
+      description: Verifica il token in possesso dell'utente e lo confronta con quello nel sistema
+      operationId: verifyToken
+      security:
+        - bearerAuth: []  #Richiamiamo il bearerAuth del component security
+
+      responses:
+        '200':
+          description: access token verificato con successo, utente verificato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: "1"  #ID utente associato al token
+                  name:
+                    type: string
+                    example: "name" 
+                  username:
+                    type: string
+        '401':
+          description: Accesso non autorizzato (Token errato/scaduto o non valido)
+          
+  /token/refresh:
+    post:
+      tags:
+        - Servizio Autenticazione
+      summary: Rinnovo dell'access token usando il refresh token
+      description: Restituisce un nuovo access token se il refresh token è valido.
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+                  example: "refreshToken"
+      responses:
+        '200':
+          description: Refresh token valido, access token generato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                    example: "newAccessToken"
+                  message:
+                    type: string
+                    example: "Nuovo access token generato con successo"
+        '401':
+          description: Accesso non autorizzato, token mancante o non valido
+          
+  /logout:
+    post:
+      tags:
+        - Servizio Autenticazione
+      summary: Logout dell'utente
+      description: Invalida l'access token e il refresh token, disconnettendo l'utente dal sistema.
+      operationId: logout
+      security: #Richiamiamo il bearerAuth del component security
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logout eseguito con successo, token invalidato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Logout eseguito con successo. Token invalidato."
+        '401':
+          description: Accesso non autorizzato, nessun token fornito o token non valido
+  
+  #due scadenze, una per l'otp inviato ed una per il sessionOtp che ovviamente sarà più lungo, così possiamo richiedere nuovi otp
+  #questo fa sì che possiamo anche mettere un counter di volte in cui è stata richiesto il reSend e mettere un limite per evitare attacchi
+  /otp/reSend:
+    post:
+      tags:
+        - Servizio Autenticazione
+      summary: Reinvio dell'OTP
+      description: Invia un nuovo OTP via Email o console, invalidando il precedente ed impostando una nuova scadenza
+      operationId: reSendOtp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sessionOtp:
+                  type: string
+                  example: "sessionOTP"  # sessionOtp associato alla sessione dell'utente
+      responses:
+        '200':
+          description: OTP inviato con successo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "OTP inviato con successo tramite mail o console"
+        '401':
+          description: Accesso non autorizzato (OTP o sessionOTP errato/scaduto o non valido)
