@@ -6,13 +6,11 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseCookie;
 
 import java.security.Key;
 
-public abstract class TokenCookieManager {
-
-    private final Logger logger = LoggerFactory.getLogger(TokenCookieManager.class);
+public abstract class TokenManager {
+    private final Logger logger = LoggerFactory.getLogger(TokenManager.class);
 
     protected String path = "api/";
 
@@ -25,14 +23,6 @@ public abstract class TokenCookieManager {
     //Restituisce la chiave segreta utilizzata per firmare e verificare i JWT
     //Utilizza Keys.hmacShaKeyFor per decodificare il segreto base64 configurato
     public abstract Key key();
-
-    //Genera un nuovo JWT per l'utente specificato e lo restituisce come ResponseCookie
-    //Imposta il cookie HTTP con le impostazioni necessarie (path, maxAge, httpOnly)
-    public abstract ResponseCookie generateCookie(String username);
-
-    //Crea un cookie vuoto per rimuovere il JWT
-    //Viene utilizzato quando è necessario eliminare il JWT memorizzato nel client
-    public abstract ResponseCookie getCleanJwtCookie();
 
     //Verifica la validità del token JWT fornito
     //Gestisce eccezioni per token malformati, scaduti, non supportati o con argomenti non validi
@@ -59,5 +49,4 @@ public abstract class TokenCookieManager {
         return Jwts.parserBuilder().setSigningKey(key()).build()
                 .parseClaimsJws(token).getBody().getSubject();
     }
-
 }

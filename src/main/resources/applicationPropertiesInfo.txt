@@ -11,8 +11,15 @@ spring.mail.properties.mail.smtp.starttls.enable=true
 spring.mail.default-encoding=UTF-8
 
 #JWT
+#il nome del cookie in cui è memorizzato il JWT
 spring.app.jwtAccessCookieName =jwtAccessCookie
 spring.app.jwtRefreshCookieName = jwtRefreshCookie
-spring.app.jwtSecret =PeroquantoatequellochepuifarechetupertequalcosadapoterfaredovrebbeesserciNonticostringeranessunoPensadatestodecididatestochecosaadessotutestessodebbafare
+#il segreto utilizzato per firmare e verificare i JWT
+spring.app.jwtSecret =\
+PeroquantoatequellochepuifarechetupertequalcosadapoterfaredovrebbeesserciNonticostringeranessunoPensadatestodecididatestochecosaadessotutestessodebbafare
+#la durata di validità del JWT access in millisecondi #1h
+#spring.app.jwtAccessExpirations = 3600000
+                                #1 minuto per test
 spring.app.jwtAccessExpirations = 60000
+#la durata di validità del JWT refresh in millisecondi #7 Giorni
 spring.app.jwtRefreshExpirations = 604800000

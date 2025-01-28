@@ -25,8 +25,9 @@ public class VerifyTokenImpl implements VerifyTokenService {
 
     @Override
     public FirstStepVerifyTokenResponse firstStep(HttpSession session, HttpServletRequest request, HttpServletResponse response) {
-        //voglio recuperarel 'access token dal cookie
-        String accessToken = jwtUtil.getAccessJwtFromCookie(request);
+        //voglio recuperarel 'access token
+        String accessToken = jwtUtil.getAccessJwtFromHeader(request);
+
 
         if (accessToken == null || accessToken.isEmpty()) {
             logger.error("Access token mancante");
@@ -39,41 +40,9 @@ public class VerifyTokenImpl implements VerifyTokenService {
             jwtUtil.validateAccessToken(accessToken);
         }catch (ExpiredJwtException e){
             logger.error("Access token scaduto, prova ottenimento nuovo tramite refresh token");
-            response.addHeader("Set-Cookie", jwtUtil.getCleanAccessTokenCookie().toString());
-            //todo si schianta, controllare
-            String refreshToken = jwtUtil.getRefreshJwtFromCookie(request);
-
-            if (refreshToken == null || refreshToken.isEmpty()) {
-                logger.error("Refresh token mancante");
-                session.invalidate();
-                response.addHeader("Set-Cookie", jwtUtil.getCleanRefreshTokenCookie().toString());
-                throw new MissingTokenException("Refresh Token mancante, effettuare login");
-            }
-
-            logger.info("Refresh token: {}",refreshToken);
-
-            if (!jwtUtil.validateRefreshToken(refreshToken)) {
-                logger.error("Refresh token non valido");
-                session.invalidate();
-                response.addHeader("Set-Cookie", jwtUtil.getCleanRefreshTokenCookie().toString());
-                throw new MissingTokenException("Refresh Token non valido, effettuare login");
-            }
-            String username = jwtUtil.getUsernameFromRefreshToken(refreshToken);
-            ResponseCookie newAccessToken = jwtUtil.generateAccessToken(username);
-
-            response.addCookie(new Cookie(newAccessToken.getName(), newAccessToken.getValue()));
-            //L'errore si verifica perché il codice tenta di recuperare il nuovo access token dal cookie,
-            //ma il cookie aggiornato non è ancora stato effettivamente letto nella richiesta corrente.
-            // Questo accade perché l'aggiornamento del cookie viene inviato nella risposta e non è disponibile immediatamente nella richiesta corrente.
-            //Per risolvere questo problema, invece di rileggere immediatamente il token dal cookie,
-            //assegnamo direttamente il nuovo token generato (newAccessToken) a una variabile e utilizzarlo per continuare il flusso.
-
-            //si schiantava
-            //accessToken = jwtUtil.getAccessJwtFromCookie(request);
-
-            //utilizziamo direttamente il nuovo token generato //funziona
-            accessToken =  newAccessToken.getValue();
         }
+
+        logger.debug("Access token prima di estrarre lo username: {}", accessToken);
 
         String username = jwtUtil.getUsernameFromAccessToken(accessToken);
         logger.info("Username dall'accessToken: {}",username);

@@ -1,6 +1,8 @@
 package com.example.autenticationservice.application;
 
 import com.example.autenticationservice.application.mapper.*;
+import com.example.autenticationservice.domain.model.NewAccessTokenByRefreshToken.FirstStepNewAccessTokenByRefreshTokenRequest;
+import com.example.autenticationservice.domain.model.NewAccessTokenByRefreshToken.FirstStepNewAccessTokenByRefreshTokenResponse;
 import com.example.autenticationservice.domain.model.ResendOtp.FirstStepResendOtpRequest;
 import com.example.autenticationservice.domain.model.ResendOtp.FirstStepResendOtpResponse;
 import com.example.autenticationservice.domain.model.login.FirstStepRequest;
@@ -48,6 +50,9 @@ public class ServizioAutenticazioneApiDelegateImpl implements ServizioAutenticaz
     private final VerifyTokenService verifyTokenService;
     private final VerifyTokenMappers verifyTokenMappers;
 
+    private final NewAccessTokenByRefreshTokenService newAccessTokenByRefreshTokenService;
+    private final NewAccessTokenByRefreshTokenMappers newAccessTokenByRefreshTokenMappers;
+
 
 
     @Override
@@ -76,7 +81,7 @@ public class ServizioAutenticazioneApiDelegateImpl implements ServizioAutenticaz
 
     @Override
     public ResponseEntity<Logout200Response> logout(){
-        FirstStepLogoutResponse response = logoutService.firstStep(httpSession, httpServletResponseResponse);
+        FirstStepLogoutResponse response = logoutService.firstStep(httpSession, httpServletResponseResponse, httpServletRequestRequest);
         Logout200Response convertedResponse = logoutMappers.convertFromDomain(response);
         return ResponseEntity.ok(convertedResponse);
 
@@ -94,6 +99,14 @@ public class ServizioAutenticazioneApiDelegateImpl implements ServizioAutenticaz
     public ResponseEntity<VerifyToken200Response>  verifyToken(){
         FirstStepVerifyTokenResponse response = verifyTokenService.firstStep(httpSession, httpServletRequestRequest, httpServletResponseResponse);
         VerifyToken200Response convertedResponse = verifyTokenMappers.convertFromDomain(response);
+        return ResponseEntity.ok(convertedResponse);
+    }
+
+    @Override
+    public ResponseEntity<RefreshToken200Response>  refreshToken(RefreshTokenRequest refreshTokenRequest){
+        FirstStepNewAccessTokenByRefreshTokenRequest request = newAccessTokenByRefreshTokenMappers.convertToDomain(refreshTokenRequest);
+        FirstStepNewAccessTokenByRefreshTokenResponse response = newAccessTokenByRefreshTokenService.firstStep(request, httpServletRequestRequest, httpSession, httpServletResponseResponse);
+        RefreshToken200Response convertedResponse = newAccessTokenByRefreshTokenMappers.convertFromDomain(response);
         return ResponseEntity.ok(convertedResponse);
     }
 }

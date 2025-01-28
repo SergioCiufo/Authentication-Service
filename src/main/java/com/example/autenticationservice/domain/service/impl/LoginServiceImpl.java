@@ -42,6 +42,7 @@ public class LoginServiceImpl implements LoginService {
     private final UserListUtil userListUtil;
     private final OtpUtil otpUtil;
     private final EmailService emailService;
+    //private final PasswordEncryptionUtil passwordEncryptionUtil;
 
     @Override
     public FirstStepResponse firstStep(FirstStepRequest firstStepRequest, HttpSession session) { //ho aggiunto la session per il sessionId
@@ -101,4 +102,14 @@ public class LoginServiceImpl implements LoginService {
                 .filter(user -> user.getUsername().equals(username))
                 .anyMatch(user -> user.getPassword().equals(password));
     }
+
+    //con password criptata
+    /*
+    private boolean credentialValid(String username, String password) {
+        return userListUtil.getUserList().stream()
+                .filter(user -> user.getUsername().equals(username))
+                .anyMatch(user -> passwordEncryptionUtil.verifyPassword(password, user.getPassword()));
+    }
+
+     */
 }

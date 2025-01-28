@@ -9,11 +9,7 @@ import com.example.autenticationservice.domain.util.UserListUtil;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -22,6 +18,7 @@ public class RegisterServiceImpl  implements RegisterService {
     private final Logger logger = LoggerFactory.getLogger(RegisterServiceImpl.class);
 
     private final UserListUtil userListUtil;
+    //private final PasswordEncryptionUtil passwordEncryptionUtil;
 
     @Override
     public FirstStepRegisterResponse firstStep(FirstStepRegisterRequest firstStepRegisterRequest) {
@@ -29,8 +26,14 @@ public class RegisterServiceImpl  implements RegisterService {
         String username = firstStepRegisterRequest.getUsername();
         String email = firstStepRegisterRequest.getEmail();
         String password = firstStepRegisterRequest.getPassword();
+        logger.info("password prima dell'encryption {}", password);
+
+        //String encryptedPassword = passwordEncryptionUtil.encryptPassword(password);
+        //logger.info("password dopo l'encryption {}", encryptedPassword);
 
         User newUser = new User(null, name, username, email, password, null);
+        //con password criptata
+        //User newUser = new User(null, name, username, email, encryptedPassword, null);
 
         String registerValid = registerValid(newUser);
         if(registerValid != null) {

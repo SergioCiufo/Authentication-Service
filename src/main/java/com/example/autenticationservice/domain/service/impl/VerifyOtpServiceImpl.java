@@ -81,14 +81,14 @@ public class VerifyOtpServiceImpl implements VerifyOtpService {
         logger.info("Tutto corretto. Generare Token");
         String username = session.getAttribute("username").toString();
 
-        ResponseCookie accessToken = jwtUtil.generateAccessToken(username);
         ResponseCookie refreshToken = jwtUtil.generateRefreshToken(username);
-        String token = accessToken.getValue();
 
-        response.addCookie(new Cookie(accessToken.getName(), accessToken.getValue()));
+        String accessToken = jwtUtil.generateAccessToken(username);
+        response.setHeader("Authorization", "Bearer " + accessToken);
+
         response.addCookie(new Cookie(refreshToken.getName(), refreshToken.getValue()));
 
-        logger.info(String.format("Access Token: %s",accessToken.getValue()));
+        logger.info(String.format("Access Token: %s",accessToken));
         logger.info(String.format("Refresh Token: %s",refreshToken.getValue()));
 
         //TODO DA CANCELLARE
@@ -112,9 +112,12 @@ public class VerifyOtpServiceImpl implements VerifyOtpService {
         logger.info(String.format("Oggetto Refresh Token: %s",refreshJwt));
         // FINE ESEMPIO
 
+        //TODO invalidare otp dopo aver avuto l'accesso, vedere bene il sessionID come confrontarlo al meglio
+        //TODO vedere cambiare nomi allo swagger
+        //TODO vedere l'email service come spiegato da nicola (una parte nell'application ed una parte nel domain)
 
         return FirstStepVerifyOtpResponse.builder()
-                .token(token)
+                .token(accessToken)
                 .build();
     }
 }

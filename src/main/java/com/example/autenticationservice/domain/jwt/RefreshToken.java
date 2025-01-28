@@ -15,7 +15,7 @@ import java.security.Key;
 import java.util.Date;
 
 @Component
-public class RefreshTokenManager extends TokenCookieManager {
+public class RefreshToken extends TokenManager {
     @Value("${spring.app.jwtSecret}")
     private String jwtSecret;
 
@@ -58,7 +58,6 @@ public class RefreshTokenManager extends TokenCookieManager {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     }
 
-    @Override
     public ResponseCookie generateCookie(String username) {
         String token = generateToken(username);
         return ResponseCookie.from(jwtRefreshCookie, token)
@@ -69,7 +68,8 @@ public class RefreshTokenManager extends TokenCookieManager {
                 .build();
     }
 
-    @Override
+    //Crea un cookie vuoto per rimuovere il JWT
+    //Viene utilizzato quando è necessario eliminare il JWT memorizzato nel client
     public ResponseCookie getCleanJwtCookie(){
         return ResponseCookie.from(jwtRefreshCookie, null)
                 .path(path)
