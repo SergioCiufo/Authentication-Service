@@ -86,9 +86,9 @@ public class LoginServiceImpl implements LoginService {
                         .toLocalTime()
                         .format(DateTimeFormatter.ofPattern("HH:mm")));
 
-        //settiamo il sessionId (lo usiamo per il secondo check)
-        session.setAttribute("sessionId", sessionId);
-        logger.info(String.format("Session ID: %s", sessionId));
+//        //settiamo il sessionId (lo usiamo per il secondo check)
+//        session.setAttribute("sessionId", sessionId);
+//        logger.info(String.format("Session ID: %s", sessionId));
 
         //set in maniera più fluida
         return FirstStepResponse.builder()

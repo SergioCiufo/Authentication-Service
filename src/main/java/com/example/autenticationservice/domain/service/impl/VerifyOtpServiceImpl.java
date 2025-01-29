@@ -39,7 +39,7 @@ public class VerifyOtpServiceImpl implements VerifyOtpService {
     public FirstStepVerifyOtpResponse firstStep(FirstStepVerifyOtpRequest firstStepVerifyOtpRequest, HttpSession session, HttpServletResponse response) {
 
         String otp = firstStepVerifyOtpRequest.getOtp();
-        String sessionId = session.getId();
+        //String sessionId = session.getId();
 
         //otp salvato in sessione per controllare l'otp che inserisce l'utente
         String checkOtp= (String)session.getAttribute("otp");
@@ -64,7 +64,7 @@ public class VerifyOtpServiceImpl implements VerifyOtpService {
             throw new ExpireOtpException("Tentativi inserimento OTP esauriti");
         }
 
-        if (!(checkOtp.equals(otp) && checksessionId.equals(sessionId))) {
+        if (!(checkOtp.equals(otp) /*&& checksessionId.equals(sessionId)*/)) {
             session.setAttribute("otpAttempt", otpAttempt + 1);
             throw new InvalidCredentialsException("OTP non valido");
         }

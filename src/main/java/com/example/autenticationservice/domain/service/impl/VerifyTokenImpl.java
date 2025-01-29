@@ -6,14 +6,12 @@ import com.example.autenticationservice.domain.model.verifyToken.FirstStepVerify
 import com.example.autenticationservice.domain.service.VerifyTokenService;
 import com.example.autenticationservice.domain.util.JwtUtil;
 import io.jsonwebtoken.ExpiredJwtException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 
 @Service
