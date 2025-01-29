@@ -69,7 +69,7 @@ public class AutenticationServiceExceptionHandler {
     public ResponseEntity<Object> handleTokenExpiredException(TokenExpiredException ex, WebRequest request) {
         logError(ex, request);
         return ResponseEntity
-                .status(401)
+                .status(403)
                 .body(ex.getMessage());
     }
 

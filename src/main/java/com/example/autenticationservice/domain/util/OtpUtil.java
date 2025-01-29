@@ -36,4 +36,8 @@ public class OtpUtil {
         session.removeAttribute("otpAttempt");
         session.removeAttribute("otpExpireTime");
     }
+
+    public long calculateOtpExpirationTime() {
+        return System.currentTimeMillis() + 1 * 60 * 1000; // 1 minuto
+    }
 }

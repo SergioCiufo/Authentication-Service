@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class FirstStepRequest {
+public class FirstStepLoginRequest {
     private String username;
     private String password;
 }

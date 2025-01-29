@@ -5,8 +5,8 @@ import com.example.autenticationservice.domain.model.NewAccessTokenByRefreshToke
 import com.example.autenticationservice.domain.model.NewAccessTokenByRefreshToken.FirstStepNewAccessTokenByRefreshTokenResponse;
 import com.example.autenticationservice.domain.model.ResendOtp.FirstStepResendOtpRequest;
 import com.example.autenticationservice.domain.model.ResendOtp.FirstStepResendOtpResponse;
-import com.example.autenticationservice.domain.model.login.FirstStepRequest;
-import com.example.autenticationservice.domain.model.login.FirstStepResponse;
+import com.example.autenticationservice.domain.model.login.FirstStepLoginRequest;
+import com.example.autenticationservice.domain.model.login.FirstStepLoginResponse;
 import com.example.autenticationservice.domain.model.logout.FirstStepLogoutResponse;
 import com.example.autenticationservice.domain.model.register.FirstStepRegisterRequest;
 import com.example.autenticationservice.domain.model.register.FirstStepRegisterResponse;
@@ -28,85 +28,68 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor //creami costruttore con parametri richiesti (final) @Service
 @RestController
 public class ServizioAutenticazioneApiDelegateImpl implements ServizioAutenticazioneApiDelegate {
-    private final LoginService loginService;
-    private final LoginMappers loginMappers;
+
+    private final AutenticationMappers autenticationMappers;
+    private final AutenticationService autenticationService;
 
     private final HttpSession httpSession; //ho aggiunto la session per il sessionId
     private final HttpServletResponse httpServletResponseResponse;
     private final HttpServletRequest httpServletRequestRequest;
 
-    private final RegisterService registerService;
-    private final RegisterMappers registerMappers;
-
-    private final VerifyOtpService verifyOtpService;
-    private final VerifyOtpMappers verifyOtpMappers;
-
-    private final LogoutService logoutService;
-    private final LogoutMappers logoutMappers;
-
-    private final ResendOtpService resendOtpService;
-    private final ResendOtpMappers resendOtpMappers;
-
-    private final VerifyTokenService verifyTokenService;
-    private final VerifyTokenMappers verifyTokenMappers;
-
-    private final NewAccessTokenByRefreshTokenService newAccessTokenByRefreshTokenService;
-    private final NewAccessTokenByRefreshTokenMappers newAccessTokenByRefreshTokenMappers;
-
 
 
     @Override
     public ResponseEntity<Login200Response> login(LoginRequest loginRequest){
-        FirstStepRequest request = loginMappers.convertToDomain(loginRequest);
-        FirstStepResponse response = loginService.firstStep(request, httpSession); //ho aggiunto la session per il sessionId
-        Login200Response convertedResponse = loginMappers.convertFromDomain(response);
+        FirstStepLoginRequest request = autenticationMappers.convertToDomain(loginRequest);
+        FirstStepLoginResponse response = autenticationService.firstStepLogin(request, httpSession); //ho aggiunto la session per il sessionId
+        Login200Response convertedResponse = autenticationMappers.convertFromDomain(response);
         return ResponseEntity.ok(convertedResponse);
     }
 
     @Override
     public ResponseEntity<Register200Response> register(RegisterRequest registerRequest){
-        FirstStepRegisterRequest request = registerMappers.convertToDomain(registerRequest);
-        FirstStepRegisterResponse response = registerService.firstStep(request);
-        Register200Response convertedResponse = registerMappers.convertFromDomain(response);
+        FirstStepRegisterRequest request = autenticationMappers.convertToDomain(registerRequest);
+        FirstStepRegisterResponse response = autenticationService.register(request);
+        Register200Response convertedResponse = autenticationMappers.convertFromDomain(response);
         return ResponseEntity.ok(convertedResponse);
     }
 
     @Override
     public ResponseEntity<VerifyOTP200Response> verifyOTP(VerifyOTPRequest verifyOTPRequest){
-        FirstStepVerifyOtpRequest request = verifyOtpMappers.convertToDomain(verifyOTPRequest);
-        FirstStepVerifyOtpResponse response = verifyOtpService.firstStep(request, httpSession, httpServletResponseResponse);
-        VerifyOTP200Response convertedResponse = verifyOtpMappers.convertFromDomain(response);
+        FirstStepVerifyOtpRequest request = autenticationMappers.convertToDomain(verifyOTPRequest);
+        FirstStepVerifyOtpResponse response = autenticationService.firstStepVerifyOtp(request, httpSession, httpServletResponseResponse);
+        VerifyOTP200Response convertedResponse = autenticationMappers.convertFromDomain(response);
         return ResponseEntity.ok(convertedResponse);
     }
 
     @Override
     public ResponseEntity<Logout200Response> logout(){
-        FirstStepLogoutResponse response = logoutService.firstStep(httpSession, httpServletResponseResponse, httpServletRequestRequest);
-        Logout200Response convertedResponse = logoutMappers.convertFromDomain(response);
+        FirstStepLogoutResponse response = autenticationService.firstStepLogout(httpSession, httpServletResponseResponse, httpServletRequestRequest);
+        Logout200Response convertedResponse = autenticationMappers.convertFromDomain(response);
         return ResponseEntity.ok(convertedResponse);
 
     }
 
     @Override
     public ResponseEntity<ReSendOtp200Response> reSendOtp(ReSendOtpRequest reSendOtpRequest){
-        FirstStepResendOtpRequest request = resendOtpMappers.convertToDomain(reSendOtpRequest);
-        FirstStepResendOtpResponse response = resendOtpService.firstStep(httpSession);
-        ReSendOtp200Response convertedResponse = resendOtpMappers.convertFromDomain(response);
+        FirstStepResendOtpRequest request = autenticationMappers.convertToDomain(reSendOtpRequest);
+        FirstStepResendOtpResponse response = autenticationService.firstStepResendOtp(httpSession);
+        ReSendOtp200Response convertedResponse = autenticationMappers.convertFromDomain(response);
         return ResponseEntity.ok(convertedResponse);
     }
 
     @Override
     public ResponseEntity<VerifyToken200Response>  verifyToken(){
-        FirstStepVerifyTokenResponse response = verifyTokenService.firstStep(httpSession, httpServletRequestRequest, httpServletResponseResponse);
-        VerifyToken200Response convertedResponse = verifyTokenMappers.convertFromDomain(response);
+        FirstStepVerifyTokenResponse response = autenticationService.firstStepVerifyToken(httpSession, httpServletRequestRequest, httpServletResponseResponse);
+        VerifyToken200Response convertedResponse = autenticationMappers.convertFromDomain(response);
         return ResponseEntity.ok(convertedResponse);
     }
 
     @Override
     public ResponseEntity<RefreshToken200Response>  refreshToken(RefreshTokenRequest refreshTokenRequest){
-        FirstStepNewAccessTokenByRefreshTokenRequest request = newAccessTokenByRefreshTokenMappers.convertToDomain(refreshTokenRequest);
-        FirstStepNewAccessTokenByRefreshTokenResponse response = newAccessTokenByRefreshTokenService.firstStep(request, httpServletRequestRequest, httpSession, httpServletResponseResponse);
-        RefreshToken200Response convertedResponse = newAccessTokenByRefreshTokenMappers.convertFromDomain(response);
+        FirstStepNewAccessTokenByRefreshTokenRequest request = autenticationMappers.convertToDomain(refreshTokenRequest);
+        FirstStepNewAccessTokenByRefreshTokenResponse response = autenticationService.firstStepGetNewAccessToken(request, httpServletRequestRequest, httpSession, httpServletResponseResponse);
+        RefreshToken200Response convertedResponse = autenticationMappers.convertFromDomain(response);
         return ResponseEntity.ok(convertedResponse);
     }
 }
