@@ -4,14 +4,13 @@ import com.example.autenticationservice.domain.exceptions.InvalidCredentialsExce
 import com.example.autenticationservice.domain.model.User;
 import com.example.autenticationservice.domain.model.login.FirstStepRequest;
 import com.example.autenticationservice.domain.model.login.FirstStepResponse;
-import com.example.autenticationservice.domain.service.EmailService;
+import com.example.autenticationservice.domain.api.EmailService;
 import com.example.autenticationservice.domain.service.LoginService;
 import com.example.autenticationservice.domain.util.OtpUtil;
 import com.example.autenticationservice.domain.util.UserListUtil;
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -21,6 +20,7 @@ import java.util.*;
 
 @Service
 @AllArgsConstructor
+@Log4j2 //da accesso a logger log.qualcosa
 public class LoginServiceImpl implements LoginService {
 /*
     private List<Map.Entry<String, String>> userCredentialsList = Arrays.asList(
@@ -36,7 +36,8 @@ public class LoginServiceImpl implements LoginService {
         add(new User("test", "test", "test@test.com", "test"));
 }};
 */
-    private final Logger logger = LoggerFactory.getLogger(LoginServiceImpl.class);
+    //private final Logger logger = LoggerFactory.getLogger(LoginServiceImpl.class);
+    //log personali log.debug
 
     private final UserListUtil userListUtil;
     private final OtpUtil otpUtil;
@@ -51,7 +52,7 @@ public class LoginServiceImpl implements LoginService {
         String sessionId = session.getId();
 
         if(!credentialValid(username, password)) {
-            logger.error("Username o Password errati");
+            log.error("Username o Password errati: {}", username);
             throw new InvalidCredentialsException("Username o Password errati");
         }
 
@@ -73,14 +74,14 @@ public class LoginServiceImpl implements LoginService {
         emailService.sendEmail(emailReceiver, emailSubject, otp);
 
         session.setAttribute("otp", otp);
-        logger.info(String.format("OTP: %s", session.getAttribute("otp")));
+        log.info(String.format("OTP: %s", session.getAttribute("otp")));
         //System.out.println("OTP Salvato in sessione: " + session.getAttribute("otp"));
 
         //settiamo l'orario in cui è stato registrato l'otp (in millisecondi)
         long otpExpireTime = System.currentTimeMillis() + 1*60*1000; //durata 1 minuti
         session.setAttribute("otpExpireTime", otpExpireTime);
 
-        logger.info("OTP Expire Time: {}",
+        log.debug("OTP Expire Time: {}",
                 Instant.ofEpochMilli((Long) session.getAttribute("otpExpireTime"))
                         .atZone(ZoneId.systemDefault())
                         .toLocalTime()

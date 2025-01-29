@@ -70,7 +70,7 @@ paths:
         - Servizio Autenticazione
       summary: Login con OTP
       description: Restituisce un OTP dopo una corretta autenticazione con username e password
-      operationId: getOTP
+      operationId: login
       requestBody:
         description: Dati di login dell'utente
         required: true

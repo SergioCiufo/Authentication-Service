@@ -56,10 +56,10 @@ public class ServizioAutenticazioneApiDelegateImpl implements ServizioAutenticaz
 
 
     @Override
-    public ResponseEntity<GetOTP200Response> getOTP(GetOTPRequest getOTPRequest){
-        FirstStepRequest request = loginMappers.convertToDomain(getOTPRequest);
+    public ResponseEntity<Login200Response> login(LoginRequest loginRequest){
+        FirstStepRequest request = loginMappers.convertToDomain(loginRequest);
         FirstStepResponse response = loginService.firstStep(request, httpSession); //ho aggiunto la session per il sessionId
-        GetOTP200Response convertedResponse = loginMappers.convertFromDomain(response);
+        Login200Response convertedResponse = loginMappers.convertFromDomain(response);
         return ResponseEntity.ok(convertedResponse);
     }
 
