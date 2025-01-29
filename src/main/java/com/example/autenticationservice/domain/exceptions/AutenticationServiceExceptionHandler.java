@@ -65,4 +65,12 @@ public class AutenticationServiceExceptionHandler {
                 .body(ex.getMessage());
     }
 
+    @ExceptionHandler({TokenExpiredException.class})
+    public ResponseEntity<Object> handleTokenExpiredException(TokenExpiredException ex, WebRequest request) {
+        logError(ex, request);
+        return ResponseEntity
+                .status(401)
+                .body(ex.getMessage());
+    }
+
 }

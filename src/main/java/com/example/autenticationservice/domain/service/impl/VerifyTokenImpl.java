@@ -1,6 +1,7 @@
 package com.example.autenticationservice.domain.service.impl;
 
 import com.example.autenticationservice.domain.exceptions.MissingTokenException;
+import com.example.autenticationservice.domain.exceptions.TokenExpiredException;
 import com.example.autenticationservice.domain.model.verifyToken.FirstStepVerifyTokenResponse;
 import com.example.autenticationservice.domain.service.VerifyTokenService;
 import com.example.autenticationservice.domain.util.JwtUtil;
@@ -40,6 +41,7 @@ public class VerifyTokenImpl implements VerifyTokenService {
             jwtUtil.validateAccessToken(accessToken);
         }catch (ExpiredJwtException e){
             logger.error("Access token scaduto, prova ottenimento nuovo tramite refresh token");
+            throw new TokenExpiredException("Access token scaduto, prova ottenimento nuovo tramite refresh token");
         }
 
         logger.debug("Access token prima di estrarre lo username: {}", accessToken);

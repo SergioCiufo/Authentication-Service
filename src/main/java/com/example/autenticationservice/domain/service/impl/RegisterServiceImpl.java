@@ -26,7 +26,7 @@ public class RegisterServiceImpl  implements RegisterService {
         String username = firstStepRegisterRequest.getUsername();
         String email = firstStepRegisterRequest.getEmail();
         String password = firstStepRegisterRequest.getPassword();
-        logger.info("password prima dell'encryption {}", password);
+        //logger.info("password prima dell'encryption {}", password);
 
         //String encryptedPassword = passwordEncryptionUtil.encryptPassword(password);
         //logger.info("password dopo l'encryption {}", encryptedPassword);
