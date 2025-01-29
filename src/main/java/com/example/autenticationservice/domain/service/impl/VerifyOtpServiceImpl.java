@@ -112,9 +112,11 @@ public class VerifyOtpServiceImpl implements VerifyOtpService {
         logger.info(String.format("Oggetto Refresh Token: %s",refreshJwt));
         // FINE ESEMPIO
 
-        //TODO invalidare otp dopo aver avuto l'accesso, vedere bene il sessionID come confrontarlo al meglio
+        //TODO vedere bene il sessionID come confrontarlo al meglio
         //TODO vedere cambiare nomi allo swagger
-        //TODO vedere l'email service come spiegato da nicola (una parte nell'application ed una parte nel domain)
+
+        otpUtil.removeOtpFromSession(session);
+        session.removeAttribute("username");
 
         return FirstStepVerifyOtpResponse.builder()
                 .token(accessToken)

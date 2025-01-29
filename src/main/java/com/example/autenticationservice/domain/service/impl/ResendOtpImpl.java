@@ -3,6 +3,7 @@ package com.example.autenticationservice.domain.service.impl;
 import com.example.autenticationservice.domain.exceptions.InvalidSessionException;
 import com.example.autenticationservice.domain.model.ResendOtp.FirstStepResendOtpResponse;
 import com.example.autenticationservice.domain.model.User;
+import com.example.autenticationservice.application.service.EmailServiceImpl;
 import com.example.autenticationservice.domain.service.EmailService;
 import com.example.autenticationservice.domain.service.ResendOtpService;
 import com.example.autenticationservice.domain.util.OtpUtil;
@@ -62,8 +63,9 @@ public class ResendOtpImpl implements ResendOtpService {
                 .findFirst();
 
         if (user.isPresent()) {
-            String email = user.get().getEmail();
-            emailService.sendEmail(email, newOtp);
+            String emailReceiver = user.get().getEmail();
+            String emailSubject = "Chat4Me - OTP code";
+            emailService.sendEmail(emailReceiver, emailSubject, newOtp);
         } else {
             logger.warn("Utente non trovato per username: {}", username);
             throw new InvalidSessionException("Utente non valido o inesistente");

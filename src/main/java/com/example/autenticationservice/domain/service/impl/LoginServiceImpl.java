@@ -12,7 +12,6 @@ import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -64,13 +63,14 @@ public class LoginServiceImpl implements LoginService {
                 .filter(u -> u.getUsername().equals(username))
                 .findFirst();
 
-        String email = user.get().getEmail();
+        String emailReceiver = user.get().getEmail();
         session.setAttribute("username", user.get().getUsername());
 
         session.setAttribute("user", user);
 
+        String emailSubject = "Chat4Me - OTP code";
         //invia la mail con l'otp
-        emailService.sendEmail(email, otp);
+        emailService.sendEmail(emailReceiver, emailSubject, otp);
 
         session.setAttribute("otp", otp);
         logger.info(String.format("OTP: %s", session.getAttribute("otp")));

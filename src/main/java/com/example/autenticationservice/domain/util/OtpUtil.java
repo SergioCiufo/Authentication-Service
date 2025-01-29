@@ -1,5 +1,6 @@
 package com.example.autenticationservice.domain.util;
 
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;
@@ -28,5 +29,11 @@ public class OtpUtil {
     public boolean isOtpExpired(long otpExpireTime) {
         long currentTime = Instant.now().toEpochMilli();
         return (currentTime > otpExpireTime);
+    }
+
+    public void removeOtpFromSession(HttpSession session) {
+        session.removeAttribute("otp");
+        session.removeAttribute("otpAttempt");
+        session.removeAttribute("otpExpireTime");
     }
 }
