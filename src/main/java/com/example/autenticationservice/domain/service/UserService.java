@@ -6,6 +6,8 @@ import com.example.autenticationservice.domain.util.UserListUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @AllArgsConstructor
 public class UserService {
@@ -18,4 +20,27 @@ public class UserService {
                 .findFirst()
                 .orElseThrow(() -> new InvalidCredentialsException("Username o Password errati"));
     }
+
+    public void add(User user) {
+        userListUtil.getUserList().add(user);
+    }
+
+    public void updateUserOtpList(User user){
+        List<User> userList = userListUtil.getUserList();
+        for (int i = 0; i < userList.size(); i++) {
+            if (userList.get(i).getUsername().equals(user.getUsername())) {
+                User existingUser = userList.get(i); // Trova l'utente
+                existingUser.setOtpList(user.getOtpList()); // Aggiorna la lista OTP
+                return;
+            }
+        }
+    }
+
+    public User getUserFromUsername(String username) {
+       return userListUtil.getUserList().stream()
+               .filter(user -> user.getUsername().equals(username))
+               .findFirst()
+               .orElse(null);
+    }
+
 }

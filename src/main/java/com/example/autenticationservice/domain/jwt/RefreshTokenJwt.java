@@ -15,7 +15,7 @@ import java.security.Key;
 import java.util.Date;
 
 @Component
-public class RefreshToken extends TokenManager {
+public class RefreshTokenJwt extends TokenManager {
     @Value("${spring.app.jwtSecret}")
     private String jwtSecret;
 

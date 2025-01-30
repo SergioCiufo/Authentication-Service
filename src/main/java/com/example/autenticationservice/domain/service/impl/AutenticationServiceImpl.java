@@ -5,6 +5,7 @@ import com.example.autenticationservice.domain.api.EmailService;
 import com.example.autenticationservice.domain.exceptions.*;
 import com.example.autenticationservice.domain.model.NewAccessTokenByRefreshToken.FirstStepNewAccessTokenByRefreshTokenRequest;
 import com.example.autenticationservice.domain.model.NewAccessTokenByRefreshToken.FirstStepNewAccessTokenByRefreshTokenResponse;
+import com.example.autenticationservice.domain.model.Otp;
 import com.example.autenticationservice.domain.model.RefreshToken;
 import com.example.autenticationservice.domain.model.ResendOtp.FirstStepResendOtpResponse;
 import com.example.autenticationservice.domain.model.User;
@@ -16,10 +17,9 @@ import com.example.autenticationservice.domain.model.register.FirstStepRegisterR
 import com.example.autenticationservice.domain.model.verifyOtp.FirstStepVerifyOtpRequest;
 import com.example.autenticationservice.domain.model.verifyOtp.FirstStepVerifyOtpResponse;
 import com.example.autenticationservice.domain.model.verifyToken.FirstStepVerifyTokenResponse;
-import com.example.autenticationservice.domain.service.AutenticationService;
-import com.example.autenticationservice.domain.service.RegisterService;
-import com.example.autenticationservice.domain.service.UserService;
+import com.example.autenticationservice.domain.service.*;
 import com.example.autenticationservice.domain.util.JwtUtil;
+import com.example.autenticationservice.domain.util.OtpListUtil;
 import com.example.autenticationservice.domain.util.OtpUtil;
 import com.example.autenticationservice.domain.util.UserListUtil;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -37,6 +37,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Service
@@ -49,7 +50,9 @@ public class AutenticationServiceImpl implements AutenticationService {
     private final RegisterService registerService;
     private final EmailService emailService;
     private final OtpUtil otpUtil;
+    private final OtpService otpService;
     private final JwtUtil jwtUtil;
+    private final RefreshTokenService refreshTokenService;
 
     @Override
     public FirstStepRegisterResponse register(FirstStepRegisterRequest firstStepRegisterRequest) {
@@ -58,14 +61,14 @@ public class AutenticationServiceImpl implements AutenticationService {
         String email = firstStepRegisterRequest.getEmail();
         String password = firstStepRegisterRequest.getPassword();
 
-        User newUser = new User(null, name, username, email, password, null);
+        User newUser = new User(null, name, username, email, password, new ArrayList<>(), null);
 
         String registerValid = registerService.registerValid(newUser);
         if(registerValid != null) {
             log.error(registerValid);
             throw new CredentialTakenException(registerValid);
         }
-        userListUtil.add(newUser);
+        userService.add(newUser);
 
         return FirstStepRegisterResponse.builder()
                 .message("Registrazione effettuata")
@@ -82,18 +85,21 @@ public class AutenticationServiceImpl implements AutenticationService {
         User user = userService.validateCredentials(username, password);
 
         //generazione otp
-        String otp = otpUtil.generateOtp();
-        session.setAttribute("otp", otp);
+        Otp otp = otpService.generateOtp(user, sessionId);
+
+        user.getOtpList().add(otp);
+
+        userService.updateUserOtpList(user);
+
+        otpService.add(otp);
 
         //invio opt per email
-        emailService.sendEmail(user.getEmail(), "Chat4Me - OTP code", otp);
+        emailService.sendEmail(user.getEmail(), "Chat4Me - OTP code", otp.getOtp());
 
         //salvataggio utente nella sessione (da cambiare)
         session.setAttribute("username", user.getUsername());
-        session.setAttribute("user", user);
-        session.setAttribute("otpExpireTime", otpUtil.calculateOtpExpirationTime());
 
-        log.info("OTP generato {} e inviato a: {}", otp, user.getEmail());
+        log.info("OTP generato {} e inviato a: {}", otp.getOtp(), user.getEmail());
 
         return FirstStepLoginResponse.builder()
                 .message("Login effettuato, OTP inviato")
@@ -103,45 +109,51 @@ public class AutenticationServiceImpl implements AutenticationService {
 
     @Override
     public FirstStepVerifyOtpResponse firstStepVerifyOtp(FirstStepVerifyOtpRequest firstStepVerifyOtpRequest, HttpSession session, HttpServletResponse response) {
-        //private final int MAX_OTP_ATTEMPTS = 3;
         final int MAX_OTP_ATTEMPTS = 3;
+        final int MAX_SESSION_ATTEMPTS = 3;
 
         String otp = firstStepVerifyOtpRequest.getOtp();
-        //String sessionId = session.getId();
+        String sessionId = session.getId();
 
-        //otp salvato in sessione per controllare l'otp che inserisce l'utente
-        String checkOtp= (String)session.getAttribute("otp");
+        Otp checkOtp3 = otpService.getOtpBySessionId(sessionId);
 
-        //sessionId salvato in sessione per controllare se corrisponde con la sessione corrente
-        String checksessionId= (String)session.getAttribute("sessionId");
+        //controllo per attacchi esterni
 
-        //controlla se ci sono dei dati nella sessione (non far schiantare il programma)
-        if (checkOtp == null /*|| checksessionId == null*/) {
-            log.error("Sessione non valida");
-            throw new InvalidCredentialsException("Sessione non valida");
+        Integer sessionAttempt = (Integer) session.getAttribute("sessionAttempt");
+        sessionAttempt = (sessionAttempt == null) ? 0 : sessionAttempt;
+
+        if(checkOtp3 == null){
+            session.setAttribute("sessionAttempt", sessionAttempt + 1);
+            throw new InvalidCredentialsException("OTP non valido");
         }
 
-        //ci prendiamo otpAttempt dalla sessione
-        Integer otpAttempt = (Integer) session.getAttribute("otpAttempt");
+        if(sessionAttempt >= MAX_SESSION_ATTEMPTS){
+            session.invalidate();
+        }
+
+        //fine controllo attacchi esterni
+
+        Integer otpAttempt = checkOtp3.getAttempts();
         //otpAttempt preso dalla sessione è null? allora imposta a 0, sennò metti il valore
         otpAttempt = (otpAttempt == null) ? 0 : otpAttempt;
 
         if (otpAttempt >= MAX_OTP_ATTEMPTS){
             session.invalidate();
+            otpService.setOtpInvalid(checkOtp3);
             log.error("Tentativi inserimento OTP esauriti");
             throw new ExpireOtpException("Tentativi inserimento OTP esauriti");
         }
 
-        if (!(checkOtp.equals(otp) /*&& checksessionId.equals(sessionId)*/)) {
-            session.setAttribute("otpAttempt", otpAttempt + 1);
+        if (!checkOtp3.getOtp().equals(otp)) {
+            otpService.updateAttempt(checkOtp3, otpAttempt+1);
             throw new InvalidCredentialsException("OTP non valido");
         }
 
-        //todo if otp scaduto da sistemare
-        long otpExpireTime = (long) session.getAttribute("otpExpireTime");
+        long otpExpireTime = checkOtp3.getExpiresAt();
 
         if (otpUtil.isOtpExpired(otpExpireTime)) {
             session.invalidate();
+            otpService.setOtpInvalid(checkOtp3);
             log.error("OTP scaduto");
             throw new ExpireOtpException("OTP scaduto");
         }
@@ -159,27 +171,15 @@ public class AutenticationServiceImpl implements AutenticationService {
         log.info(String.format("Access Token: %s",accessToken));
         log.info(String.format("Refresh Token: %s",refreshToken.getValue()));
 
-        //TODO DA CANCELLARE
-        //SCOPO ESEMPIO IN ASSENZA DB
-        String refreshTokenValue = refreshToken.getValue();
-        Duration maxAge = refreshToken.getMaxAge();
-
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime refreshTokenEnd = now.plus(maxAge);
-
-
-        User user = (User) session.getAttribute("user");
+        User user = userService.getUserFromUsername(username);
         if(user == null) {
             log.error("Utente non esistente");
         }
 
-        RefreshToken refreshJwt = new RefreshToken(null, user ,refreshTokenValue, now, refreshTokenEnd);
-        log.info(String.format("Oggetto Refresh Token: %s",refreshJwt));
-        // FINE ESEMPIO
+        RefreshToken refreshJwt = refreshTokenService.addRefreshToken(refreshToken, user);
+        log.info("Oggetto Refresh User: {}, Token: {}", refreshJwt.getUser().getUsername(), refreshJwt.getRefreshToken());
 
-        //TODO creare uno storico otp e sessionId così da recuperare il dato dal db
-
-        otpUtil.removeOtpFromSession(session);
+        session.removeAttribute("sessionAttempt");
         session.removeAttribute("username");
 
         return FirstStepVerifyOtpResponse.builder()
@@ -189,43 +189,33 @@ public class AutenticationServiceImpl implements AutenticationService {
 
     @Override
     public FirstStepResendOtpResponse firstStepResendOtp(HttpSession session) {
-        log.info("OTP da annullare: {}", session.getAttribute("otp"));
+        String username = (String) session.getAttribute("username");
 
         // annulliamo l'otp precedente
-        session.removeAttribute("otp");
-        session.removeAttribute("otpExpireTime");
+        String sessionId = session.getId();
+        Otp otpToInvalidate = otpService.getOtpBySessionId(sessionId);
+        log.info("OTP da annullare: {}", otpToInvalidate.getOtp());
+        otpService.setOtpInvalid(otpToInvalidate);
+
         session.removeAttribute("otpAttempt");
         log.info("OTP cancellato");
 
         //creiamo il nuovo otp
-        String newOtp = otpUtil.generateOtp();
-        session.setAttribute("otp", newOtp);
-        log.info("New otp: {}", newOtp);
+        User user = userService.getUserFromUsername(username);
 
-        long otpExpireTime = System.currentTimeMillis() + 1*60*1000; //durata 1 minuti
-        session.setAttribute("otpExpireTime", otpExpireTime);
-        log.info("OTP Expire Time: {}",
-                Instant.ofEpochMilli((Long) session.getAttribute("otpExpireTime"))
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalTime()
-                        .format(DateTimeFormatter.ofPattern("HH:mm")));
-
-        //ci prendiamo l'info dell'utente
-        String username = (String) session.getAttribute("username");
-
-        //usiamo optional per prenderci l'utente per poi pescare la mail
-        Optional<User> user = userListUtil.getUserList().stream()
-                .filter(u -> u.getUsername().equals(username))
-                .findFirst();
-
-        if (user.isPresent()) {
-            String emailReceiver = user.get().getEmail();
-            String emailSubject = "Chat4Me - OTP code";
-            emailService.sendEmail(emailReceiver, emailSubject, newOtp);
-        } else {
+        if(user == null) {
             log.warn("Utente non trovato per username: {}", username);
             throw new InvalidSessionException("Utente non valido o inesistente");
         }
+
+        Otp newOtp = otpService.generateOtp(user, sessionId);
+        otpService.add(newOtp);
+
+        log.info("New otp: {}", newOtp.getOtp());
+
+        String emailReceiver = user.getEmail();
+        String emailSubject = "Chat4Me - OTP code";
+        emailService.sendEmail(emailReceiver, emailSubject, newOtp.getOtp());
 
         return FirstStepResendOtpResponse.builder()
                 .message("Nuovo Otp inviato")
@@ -264,30 +254,32 @@ public class AutenticationServiceImpl implements AutenticationService {
 
     @Override
     public FirstStepNewAccessTokenByRefreshTokenResponse firstStepGetNewAccessToken(FirstStepNewAccessTokenByRefreshTokenRequest firstStepRequest, HttpServletRequest request, HttpSession session, HttpServletResponse response) {
-        String refreshToken = jwtUtil.getRefreshJwtFromCookie(request);
+        String refreshTokenString = jwtUtil.getRefreshJwtFromCookie(request);
 
-        if (refreshToken == null || refreshToken.isEmpty()) {
+        if (refreshTokenString == null || refreshTokenString.isEmpty()) {
             log.error("Refresh token mancante");
             session.invalidate();
             response.setHeader("Set-Cookie", jwtUtil.getCleanRefreshTokenCookie().toString());
             throw new MissingTokenException("Refresh Token mancante, effettuare login");
         }
 
-        log.info("Refresh token: {}",refreshToken);
+        RefreshToken refreshToken = refreshTokenService.getRefreshTokenList(refreshTokenString);
 
-        if (!jwtUtil.validateRefreshToken(refreshToken)) {
+        log.info("Refresh token: {}",refreshTokenString);
+
+        if (!jwtUtil.validateRefreshToken(refreshTokenString)) {
             log.error("Refresh token non valido");
+            refreshTokenService.invalidateRefreshToken(refreshToken);
             session.invalidate();
             response.setHeader("Set-Cookie", jwtUtil.getCleanRefreshTokenCookie().toString());
             throw new MissingTokenException("Refresh Token non valido, effettuare login");
         }
 
-        String username = jwtUtil.getUsernameFromRefreshToken(refreshToken);
+        String username = refreshToken.getUser().getUsername();
 
         String accessToken = jwtUtil.generateAccessToken(username);
         response.setHeader("Authorization", "Bearer " + accessToken);
         log.info(String.format("Access Token: %s",accessToken));
-
 
         return FirstStepNewAccessTokenByRefreshTokenResponse.builder()
                 .message("Access Token Rigenerato")
@@ -297,8 +289,16 @@ public class AutenticationServiceImpl implements AutenticationService {
 
     @Override
     public FirstStepLogoutResponse firstStepLogout(HttpSession session, HttpServletResponse response, HttpServletRequest request) {
-        //sostiuisce il token con un token "con scadenza immediata, rimuovendolo
-        response.setHeader("Set-Cookie", jwtUtil.getCleanRefreshTokenCookie().toString());
+        String refreshTokenString = jwtUtil.getRefreshJwtFromCookie(request);
+
+        if (!(refreshTokenString == null || refreshTokenString.isEmpty())) {
+            RefreshToken refreshToken = refreshTokenService.getRefreshTokenList(refreshTokenString);
+            refreshTokenService.invalidateRefreshToken(refreshToken);
+
+            //sostiuisce il token con un token "con scadenza immediata, rimuovendolo
+            response.setHeader("Set-Cookie", jwtUtil.getCleanRefreshTokenCookie().toString());
+
+        }
 
         //prendi ed invalida l'access token
         response.setHeader("Authorization", "Bearer " + null);

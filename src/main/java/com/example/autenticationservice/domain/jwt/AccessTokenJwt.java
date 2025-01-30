@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 
 @Component
-public class AccessToken extends TokenManager {
+public class AccessTokenJwt extends TokenManager {
 
     @Value("${spring.app.jwtSecret}")
     private String jwtSecret;

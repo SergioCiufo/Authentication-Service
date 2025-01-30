@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor //costruttore con tutti i parametri
 @NoArgsConstructor //costruttore vuoto
 //@Entity
-//@Table(name = "RefreshToken")
+//@Table(name = "RefreshTokenJwt")
 public class RefreshToken {
     //@Id
     //@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,4 +23,5 @@ public class RefreshToken {
     private String refreshToken;
     private LocalDateTime createdAt;
     private LocalDateTime expireDate;
+    private Boolean valid;
 }

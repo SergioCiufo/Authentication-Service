@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data //questo ci crea getter e setter in automatico
 @Builder(toBuilder = true) //interfaccia differente e fluida per settare parametri //tobuilder da una classe di creare il builder
 @AllArgsConstructor //costruttore con tutti i parametri
@@ -19,6 +21,8 @@ public class User {
     private String username;
     private String email;
     private String password;
-    //@OneToOne(mappedBy = "user")
+    //@OneToMany(mappedBy = "user"", cascade = CascadeType.All)
+    private List<Otp> otpList;
+    //@OneToOne(mappedBy = "user", cascade = CascadeType.All)
     private RefreshToken refreshToken;
 }

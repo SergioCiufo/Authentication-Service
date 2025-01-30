@@ -12,18 +12,13 @@ import java.util.List;
 @Component
 public class UserListUtil {
     private List<User> userList = new ArrayList<>() {{
-        add(new User(1,"admin", "admin", "admin@admin.com", "admin", null));
-        add(new User(2,"name", "username", "email@email.com", "password", null));
-        add(new User(3,"test", "test", "test@test.com", "test", null));
+        add(new User(1,"admin", "admin", "admin@admin.com", "admin", new ArrayList<>(), null));
+        add(new User(2,"name", "username", "email@email.com", "password", new ArrayList<>(), null));
+        add(new User(3,"test", "test", "test@test.com", "test", new ArrayList<>(), null));
     }};
 
-    // Aggiungi metodi per gestire la lista degli utenti
+    // Ottieni la lista di utenti
     public List<User> getUserList() {
         return userList;
     }
-
-    public void add(User user) {
-        userList.add(user);
-    }
-
 }
