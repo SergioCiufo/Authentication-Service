@@ -1,10 +1,9 @@
 package com.example.autenticationservice.domain.service.impl;
 
-import com.example.autenticationservice.application.mapper.AutenticationMappers;
 import com.example.autenticationservice.domain.api.EmailService;
 import com.example.autenticationservice.domain.exceptions.*;
-import com.example.autenticationservice.domain.model.NewAccessTokenByRefreshToken.FirstStepNewAccessTokenByRefreshTokenRequest;
-import com.example.autenticationservice.domain.model.NewAccessTokenByRefreshToken.FirstStepNewAccessTokenByRefreshTokenResponse;
+import com.example.autenticationservice.domain.model.newAccessTokenByRefreshToken.FirstStepNewAccessTokenByRefreshTokenRequest;
+import com.example.autenticationservice.domain.model.newAccessTokenByRefreshToken.FirstStepNewAccessTokenByRefreshTokenResponse;
 import com.example.autenticationservice.domain.model.Otp;
 import com.example.autenticationservice.domain.model.RefreshToken;
 import com.example.autenticationservice.domain.model.ResendOtp.FirstStepResendOtpResponse;
@@ -19,7 +18,6 @@ import com.example.autenticationservice.domain.model.verifyOtp.FirstStepVerifyOt
 import com.example.autenticationservice.domain.model.verifyToken.FirstStepVerifyTokenResponse;
 import com.example.autenticationservice.domain.service.*;
 import com.example.autenticationservice.domain.util.JwtUtil;
-import com.example.autenticationservice.domain.util.OtpListUtil;
 import com.example.autenticationservice.domain.util.OtpUtil;
 import com.example.autenticationservice.domain.util.UserListUtil;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -32,13 +30,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor

@@ -1,7 +1,7 @@
 package com.example.autenticationservice.application.mapper;
 
-import com.example.autenticationservice.domain.model.NewAccessTokenByRefreshToken.FirstStepNewAccessTokenByRefreshTokenRequest;
-import com.example.autenticationservice.domain.model.NewAccessTokenByRefreshToken.FirstStepNewAccessTokenByRefreshTokenResponse;
+import com.example.autenticationservice.domain.model.newAccessTokenByRefreshToken.FirstStepNewAccessTokenByRefreshTokenRequest;
+import com.example.autenticationservice.domain.model.newAccessTokenByRefreshToken.FirstStepNewAccessTokenByRefreshTokenResponse;
 import com.example.autenticationservice.domain.model.ResendOtp.FirstStepResendOtpRequest;
 import com.example.autenticationservice.domain.model.ResendOtp.FirstStepResendOtpResponse;
 import com.example.autenticationservice.domain.model.login.FirstStepLoginRequest;

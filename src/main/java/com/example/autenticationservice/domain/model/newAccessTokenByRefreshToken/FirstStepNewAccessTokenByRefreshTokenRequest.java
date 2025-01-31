@@ -1,4 +1,4 @@
-package com.example.autenticationservice.domain.model.NewAccessTokenByRefreshToken;
+package com.example.autenticationservice.domain.model.newAccessTokenByRefreshToken;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
