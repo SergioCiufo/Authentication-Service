@@ -1,7 +1,12 @@
-package com.example.autenticationservice.domain.exceptions;
+package com.example.autenticationservice.application.exceptions;
 
-import com.example.autenticationservice.application.exceptions.AutenticationServiceException;
+import com.example.autenticationservice.application.jwt.RefreshTokenJwt;
+import com.example.autenticationservice.application.service.SessionService;
+import com.example.autenticationservice.domain.exceptions.*;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -10,7 +15,12 @@ import org.springframework.web.context.request.WebRequest;
 
 @ControllerAdvice
 @Log4j2 //fornisce logger statico accessibile con log
+@RequiredArgsConstructor
 public class AutenticationServiceExceptionHandler {
+
+    private SessionService sessionService;
+    private RefreshTokenJwt refreshTokenJwt;
+
     private void logError(Exception ex, WebRequest request) {
         log.error(
                 "An error happened while calling {} API: {}",
@@ -44,6 +54,7 @@ public class AutenticationServiceExceptionHandler {
     @ExceptionHandler({ExpireOtpException.class})
     public ResponseEntity<Object> handleExpireOtpException(ExpireOtpException ex, WebRequest request) {
         logError(ex, request);
+        sessionService.invalidateSession(); //todo controllare se la posizione va bene
         return ResponseEntity
                 .status(401)
                 .body(ex.getMessage());
@@ -52,8 +63,13 @@ public class AutenticationServiceExceptionHandler {
     @ExceptionHandler({MissingTokenException.class})
     public ResponseEntity<Object> handleMissingTokenException(MissingTokenException ex, WebRequest request) {
         logError(ex, request);
+
+        sessionService.invalidateSession(); //todo controllare se la posizione va bene
+        ResponseCookie cleanRefreshCookie = refreshTokenJwt.getCleanJwtCookie(); //todo da controllare
+
         return ResponseEntity
                 .status(401)
+                .header(HttpHeaders.SET_COOKIE, cleanRefreshCookie.toString())
                 .body(ex.getMessage());
     }
 

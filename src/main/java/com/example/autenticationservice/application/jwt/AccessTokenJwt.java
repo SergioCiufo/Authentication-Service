@@ -1,4 +1,4 @@
-package com.example.autenticationservice.domain.jwt;
+package com.example.autenticationservice.application.jwt;
 
 import java.security.Key;
 
@@ -7,12 +7,14 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
 @Component
+@RequiredArgsConstructor
 public class AccessTokenJwt extends TokenManager {
 
     @Value("${spring.app.jwtSecret}")
@@ -20,6 +22,8 @@ public class AccessTokenJwt extends TokenManager {
 
     @Value("${spring.app.jwtAccessExpirations}")
     private int jwtAccessExpireMs;
+
+    private final HttpServletRequest request;
 
     //Genera un nuovo JWT per il nome utente specificato
     //Imposta il soggetto (setSubject) con il nome utente
@@ -42,7 +46,7 @@ public class AccessTokenJwt extends TokenManager {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     }
 
-    public String getAccessJwtFromHeader(HttpServletRequest request) {
+    public String getAccessJwtFromHeader() {
         //Recupera il valore dell'header Authorization
         String authorizationHeader = request.getHeader("Authorization");
 

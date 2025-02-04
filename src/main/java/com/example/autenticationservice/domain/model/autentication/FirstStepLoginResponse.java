@@ -1,4 +1,4 @@
-package com.example.autenticationservice.domain.model.login;
+package com.example.autenticationservice.domain.model.autentication;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

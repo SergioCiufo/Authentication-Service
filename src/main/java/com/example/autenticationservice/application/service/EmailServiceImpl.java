@@ -13,7 +13,7 @@ public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
 
-    @Value("${spring.mail.sender}")  //ci prendiamo la mail dall'application.properties
+    @Value("${spring.mail.sender}")  //ci prendiamo la mail dall'application.yaml
     private String mailSenderAddress;
 
 

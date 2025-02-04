@@ -1,13 +1,11 @@
 package com.example.autenticationservice.domain.service;
 
-
-import com.example.autenticationservice.domain.jwt.RefreshTokenJwt;
+import com.example.autenticationservice.domain.api.JwtService;
 import com.example.autenticationservice.domain.model.RefreshToken;
 import com.example.autenticationservice.domain.model.User;
 import com.example.autenticationservice.domain.util.RefreshTokenListUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -19,11 +17,11 @@ import java.util.List;
 @Log4j2
 public class RefreshTokenService {
     private final RefreshTokenListUtil refreshTokenListUtil;
-    private final RefreshTokenJwt refreshTokenJwt;
+    private final JwtService jwtService;
 
-    public RefreshToken addRefreshToken(ResponseCookie refreshToken, User user) {
-        String refreshTokenValue = refreshToken.getValue();
-        Duration maxAge = refreshToken.getMaxAge();
+    public RefreshToken addRefreshToken(String refreshToken, User user) {
+        int maxAgeInt = jwtService.getExpirationDate();
+        Duration maxAge = Duration.ofSeconds(maxAgeInt);
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime refreshTokenEnd = now.plus(maxAge);
@@ -32,7 +30,7 @@ public class RefreshTokenService {
             log.error("Utente non esistente");
         }
 
-        RefreshToken refreshJwt = new RefreshToken(null, user ,refreshTokenValue, now, refreshTokenEnd, true);
+        RefreshToken refreshJwt = new RefreshToken(null, user ,refreshToken, now, refreshTokenEnd, true);
         refreshTokenListUtil.getRefreshTokenList().add(refreshJwt);
         return refreshJwt;
     }

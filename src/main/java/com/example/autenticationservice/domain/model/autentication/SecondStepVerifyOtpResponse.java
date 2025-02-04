@@ -1,4 +1,4 @@
-package com.example.autenticationservice.domain.model.logout;
+package com.example.autenticationservice.domain.model.autentication;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class FirstStepLogoutResponse {
-    private String message;
+public class SecondStepVerifyOtpResponse {
+    private String accessToken;
+    private String refreshToken;
 }

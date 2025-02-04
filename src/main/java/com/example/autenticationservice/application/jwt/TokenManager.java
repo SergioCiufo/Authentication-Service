@@ -1,4 +1,4 @@
-package com.example.autenticationservice.domain.jwt;
+package com.example.autenticationservice.application.jwt;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;

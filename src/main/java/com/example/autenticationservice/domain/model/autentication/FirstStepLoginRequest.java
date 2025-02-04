@@ -1,4 +1,4 @@
-package com.example.autenticationservice.domain.model.register;
+package com.example.autenticationservice.domain.model.autentication;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class FirstStepRegisterRequest {
-    private String name;
+public class FirstStepLoginRequest {
     private String username;
-    private String email;
     private String password;
+    private String sessionId;
 }

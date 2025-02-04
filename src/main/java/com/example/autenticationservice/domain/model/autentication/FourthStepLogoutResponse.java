@@ -1,4 +1,4 @@
-package com.example.autenticationservice.domain.model.newAccessTokenByRefreshToken;
+package com.example.autenticationservice.domain.model.autentication;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class FirstStepNewAccessTokenByRefreshTokenResponse {
-    private String accessToken;
+public class FourthStepLogoutResponse {
     private String message;
 }

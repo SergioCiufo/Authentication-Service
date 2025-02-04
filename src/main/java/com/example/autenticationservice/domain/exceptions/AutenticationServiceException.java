@@ -1,4 +1,4 @@
-package com.example.autenticationservice.application.exceptions;
+package com.example.autenticationservice.domain.exceptions;
 
 public class AutenticationServiceException extends RuntimeException {
   public AutenticationServiceException(String message) {

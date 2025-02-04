@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: AutenticationService
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: chat4metest@gmail.com
+    sender: chat4metest@gmail.com
+    password: yduq auzx hmjy apjw
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+    default-encoding: UTF-8
+  app:
+    jwtAccessCookieName: jwtAccessCookie
+    jwtRefreshCookieName: jwtRefreshCookie
+    jwtSecret: PeroquantoatequellochepuifarechetupertequalcosadapoterfaredovrebbeesserciNonticostringeranessunoPensadatestodecididatestochecosaadessotutestessodebbafare
+    jwtAccessExpirations: 60000
+    jwtRefreshExpirations: 604800000

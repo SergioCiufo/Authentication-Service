@@ -1,10 +1,8 @@
 package com.example.autenticationservice.domain.util;
 
-import com.example.autenticationservice.domain.jwt.AccessTokenJwt;
-import com.example.autenticationservice.domain.jwt.RefreshTokenJwt;
-import jakarta.servlet.http.HttpServletRequest;
+import com.example.autenticationservice.application.jwt.AccessTokenJwt;
+import com.example.autenticationservice.application.jwt.RefreshTokenJwt;
 import lombok.AllArgsConstructor;
-import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -35,16 +33,12 @@ public class JwtUtil {
         return accessTokenJwt.getUsernameFromToken(token);
     }
 
-    public String getAccessJwtFromHeader(HttpServletRequest request){
-        return accessTokenJwt.getAccessJwtFromHeader(request);
+    public String getAccessJwtFromHeader(){
+        return accessTokenJwt.getAccessJwtFromHeader();
     }
 
-    public ResponseCookie generateRefreshToken(String username) {
-        return refreshTokenJwt.generateCookie(username);
-    }
-
-    public String getRefreshJwtFromCookie(HttpServletRequest request) {
-        return refreshTokenJwt.getJwtFromCookie(request);
+    public String getRefreshJwtFromCookie() {
+        return refreshTokenJwt.getJwtFromCookie();
     }
 
     //Verifica la validità del token JWT fornito
@@ -59,7 +53,4 @@ public class JwtUtil {
         return refreshTokenJwt.getUsernameFromToken(token);
     }
 
-    public ResponseCookie getCleanRefreshTokenCookie() {
-       return refreshTokenJwt.getCleanJwtCookie();
-    }
 }

@@ -1,4 +1,4 @@
-package com.example.autenticationservice.domain.jwt;
+package com.example.autenticationservice.application.jwt;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -6,6 +6,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import java.security.Key;
 import java.util.Date;
 
 @Component
+@RequiredArgsConstructor
 public class RefreshTokenJwt extends TokenManager {
     @Value("${spring.app.jwtSecret}")
     private String jwtSecret;
@@ -25,10 +27,10 @@ public class RefreshTokenJwt extends TokenManager {
     @Value("${spring.app.jwtRefreshExpirations}")
     private int jwtRefreshExpireMs;
 
-
+    private final HttpServletRequest request;
 
     //Recupera il JWT dal cookie HTTP della richiesta HttpServletRequest
-    public String getJwtFromCookie(HttpServletRequest request) {
+    public String getJwtFromCookie() {
         Cookie cookie = WebUtils.getCookie(request, jwtRefreshCookie);
         if (cookie != null) {
             return cookie.getValue();
@@ -75,5 +77,9 @@ public class RefreshTokenJwt extends TokenManager {
                 .path(path)
                 .maxAge(0)
                 .build();
+    }
+
+    public int getExpirationDate(){
+        return jwtRefreshExpireMs;
     }
 }
