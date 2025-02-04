@@ -35,44 +35,6 @@ public class ServizioAutenticazioneApiDelegateImpl implements ServizioAutenticaz
     private final SessionService sessionService;
     private final JwtServiceImpl jwtServiceImpl;
 
-//    @Override
-//    public ResponseEntity<VerifyOTP200Response> verifyOTP(VerifyOTPRequest verifyOTPRequest){
-//        SecondStepVerifyOtpRequest request = autenticationMappers.convertToDomain(verifyOTPRequest);
-//        SecondStepVerifyOtpResponse response = autenticationService.firstStepVerifyOtp(request, httpSession, httpServletResponseResponse);
-//        VerifyOTP200Response convertedResponse = autenticationMappers.convertFromDomain(response);
-//        return ResponseEntity.ok(convertedResponse);
-//    }
-//
-//    @Override
-//    public ResponseEntity<Logout200Response> logout(){
-//        FourthStepLogoutResponse response = autenticationService.firstStepLogout(httpSession, httpServletResponseResponse, httpServletRequestRequest);
-//        Logout200Response convertedResponse = autenticationMappers.convertFromDomain(response);
-//        return ResponseEntity.ok(convertedResponse);
-//    }
-//
-//    @Override
-//    public ResponseEntity<ReSendOtp200Response> reSendOtp(ReSendOtpRequest reSendOtpRequest){
-//        ThridStepResendOtpRequest request = autenticationMappers.convertToDomain(reSendOtpRequest);
-//        ThirdStepResendOtpResponse response = autenticationService.firstStepResendOtp(httpSession);
-//        ReSendOtp200Response convertedResponse = autenticationMappers.convertFromDomain(response);
-//        return ResponseEntity.ok(convertedResponse);
-//    }
-//
-//    @Override
-//    public ResponseEntity<VerifyToken200Response>  verifyToken(){
-//        FirstStepVerifyTokenResponse response = autenticationService.firstStepVerifyToken(httpSession, httpServletRequestRequest, httpServletResponseResponse);
-//        VerifyToken200Response convertedResponse = autenticationMappers.convertFromDomain(response);
-//        return ResponseEntity.ok(convertedResponse);
-//    }
-//
-//    @Override
-//    public ResponseEntity<RefreshToken200Response>  refreshToken(RefreshTokenRequest refreshTokenRequest){
-//        SecondStepGetAccessTokenByRefreshTokenRequest request = autenticationMappers.convertToDomain(refreshTokenRequest);
-//        SecondStepGetAccessTokenByRefreshTokenResponse response = autenticationService.firstStepGetNewAccessToken(request, httpServletRequestRequest, httpSession, httpServletResponseResponse);
-//        RefreshToken200Response convertedResponse = autenticationMappers.convertFromDomain(response);
-//        return ResponseEntity.ok(convertedResponse);
-//    }
-
     @Override
     public ResponseEntity<Register200Response> register(RegisterRequest registerRequest){
         StepRegisterRequest request = autenticationMappers.convertToDomain(registerRequest);

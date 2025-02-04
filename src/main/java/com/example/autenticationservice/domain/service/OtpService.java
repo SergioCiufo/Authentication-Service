@@ -29,7 +29,8 @@ public class OtpService {
         String otpGenerated = otpUtil.generateOtp();
         long creationDate = Instant.now().toEpochMilli();
         long expirationDate = otpUtil.calculateOtpExpirationTime();
-        Otp otp = new Otp(null, user, otpGenerated, sessionId,creationDate, expirationDate, 0, true);
+        int attempts = 0;
+        Otp otp = new Otp(null, user, otpGenerated, sessionId,creationDate, expirationDate, attempts, true);
         return otp;
     }
 

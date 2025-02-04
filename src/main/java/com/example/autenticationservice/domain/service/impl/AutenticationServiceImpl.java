@@ -85,87 +85,6 @@ public class AutenticationServiceImpl implements AutenticationService {
                 .build();
     }
 
-
-//    @Override
-//    public SecondStepVerifyOtpResponse firstStepVerifyOtp(SecondStepVerifyOtpRequest firstStepVerifyOtpRequest, HttpSession session, HttpServletResponse response) {
-//        final int MAX_OTP_ATTEMPTS = 3;
-//        final int MAX_SESSION_ATTEMPTS = 3;
-//
-//        String otp = firstStepVerifyOtpRequest.getOtp();
-//        String sessionId = session.getId();
-//
-//        Otp checkOtp = otpService.getOtpBySessionId(sessionId);
-//
-//        //controllo per attacchi esterni
-//
-//        Integer sessionAttempt = (Integer) session.getAttribute("sessionAttempt");
-//        sessionAttempt = (sessionAttempt == null) ? 0 : sessionAttempt;
-//
-//        if(checkOtp == null){
-//            session.setAttribute("sessionAttempt", sessionAttempt + 1);
-//            throw new InvalidCredentialsException("OTP non valido");
-//        }
-//
-//        if(sessionAttempt >= MAX_SESSION_ATTEMPTS){
-//            session.invalidate();
-//        }
-//
-//        //fine controllo attacchi esterni
-//
-//        Integer otpAttempt = checkOtp.getAttempts();
-//        //otpAttempt preso dalla sessione è null? allora imposta a 0, sennò metti il valore
-//        otpAttempt = (otpAttempt == null) ? 0 : otpAttempt;
-//
-//        if (otpAttempt >= MAX_OTP_ATTEMPTS){
-//            session.invalidate();
-//            otpService.setOtpInvalid(checkOtp);
-//            log.error("Tentativi inserimento OTP esauriti");
-//            throw new ExpireOtpException("Tentativi inserimento OTP esauriti");
-//        }
-//
-//        if (!checkOtp.getOtp().equals(otp)) {
-//            otpService.updateAttempt(checkOtp, otpAttempt+1);
-//            throw new InvalidCredentialsException("OTP non valido");
-//        }
-//
-//        long otpExpireTime = checkOtp.getExpiresAt();
-//
-//        if (otpUtil.isOtpExpired(otpExpireTime)) {
-//            session.invalidate();
-//            otpService.setOtpInvalid(checkOtp);
-//            log.error("OTP scaduto");
-//            throw new ExpireOtpException("OTP scaduto");
-//        }
-//
-//        log.info("Tutto corretto. Generare Token");
-//        String username = session.getAttribute("username").toString();
-//
-//        ResponseCookie refreshToken = jwtUtil.generateRefreshToken(username);
-//
-//        String accessToken = jwtUtil.generateAccessToken(username);
-//        response.setHeader("Authorization", "Bearer " + accessToken);
-//
-//        response.addCookie(new Cookie(refreshToken.getName(), refreshToken.getValue()));
-//
-//        log.info("Access Token: {}", accessToken);
-//        log.info("Refresh Token: {}", refreshToken.getValue());
-//
-//        User user = userService.getUserFromUsername(username);
-//        if(user == null) {
-//            log.error("Utente non esistente");
-//        }
-//
-//        RefreshToken refreshJwt = refreshTokenService.addRefreshToken(refreshToken, user);
-//        log.info("Oggetto Refresh User: {}, Token: {}", refreshJwt.getUser().getUsername(), refreshJwt.getRefreshToken());
-//
-//        session.removeAttribute("sessionAttempt");
-//        session.removeAttribute("username");
-//
-//        return SecondStepVerifyOtpResponse.builder()
-//                .token(accessToken)
-//                .build();
-//    }
-
 @Override
 public SecondStepVerifyOtpResponse secondStepVerifyOtp(SecondStepVerifyOtpRequest secondStepVerifyOtpRequest) {
     String otp = secondStepVerifyOtpRequest.getOtp();
@@ -201,14 +120,9 @@ public SecondStepVerifyOtpResponse secondStepVerifyOtp(SecondStepVerifyOtpReques
         throw new ExpireOtpException("OTP scaduto");
     }
 
-    log.info("Tutto corretto. Generare Token");
-
-    //ResponseCookie refreshToken = jwtUtil.generateRefreshToken(username);
     String refreshToken = jwtService.generateRefreshToken(username);
 
     String accessToken = jwtUtil.generateAccessToken(username);
-
-    //response.addCookie(new Cookie(refreshToken.getName(), refreshToken.getValue()));
 
     log.info("Access Token: {}", accessToken);
     log.info("Refresh Token: {}", refreshToken);
@@ -219,53 +133,13 @@ public SecondStepVerifyOtpResponse secondStepVerifyOtp(SecondStepVerifyOtpReques
     }
 
     RefreshToken refreshJwt = refreshTokenService.addRefreshToken(refreshToken, user);
-    log.info("Oggetto Refresh User: {}, Token: {}", refreshJwt.getUser().getUsername(), refreshJwt.getRefreshToken());
-    log.info("Oggetto Refresh Token: {}", refreshToken);
+    log.debug("Oggetto Refresh -> User: {}, Token: {}", refreshJwt.getUser().getUsername(), refreshJwt.getRefreshToken());
 
     return SecondStepVerifyOtpResponse.builder()
             .accessToken(accessToken)
             .refreshToken(refreshToken)
             .build();
 }
-
-//    @Override
-//    public ThirdStepResendOtpResponse firstStepResendOtp(HttpSession session) {
-//        // annulliamo l'otp precedente
-//        String sessionId = session.getId();
-//
-//        //servzio db
-//        //ce lo prendiamo dal db tramite campo idSessione di otp
-//        String username = (String) session.getAttribute("username");
-//
-//        Otp otpToInvalidate = otpService.getOtpBySessionId(sessionId);
-//        log.info("OTP da annullare: {}", otpToInvalidate.getOtp());
-//        otpService.setOtpInvalid(otpToInvalidate);
-//
-//        session.removeAttribute("otpAttempt");
-//        log.info("OTP cancellato");
-//
-//        //creiamo il nuovo otp
-//        User user = userService.getUserFromUsername(username);
-//
-//        if(user == null) {
-//            log.warn("Utente non trovato per username: {}", username);
-//            throw new InvalidSessionException("Utente non valido o inesistente");
-//        }
-//
-//        Otp newOtp = otpService.generateOtp(user, sessionId);
-//        otpService.add(newOtp);
-//        //
-//
-//        String emailReceiver = user.getEmail();
-//        String emailSubject = "Chat4Me - OTP code";
-//        emailService.sendEmail(emailReceiver, emailSubject, newOtp.getOtp());
-//
-//        log.info("New otp: {}", newOtp.getOtp());
-//
-//        return ThirdStepResendOtpResponse.builder()
-//                .message("Nuovo Otp inviato")
-//                .build();
-//    }
 
     @Override
     public ThirdStepResendOtpResponse thirdStepResendOtp(ThridStepResendOtpRequest thridStepResendOtpRequest) {
@@ -276,7 +150,7 @@ public SecondStepVerifyOtpResponse secondStepVerifyOtp(SecondStepVerifyOtpReques
         //ce lo prendiamo dal db tramite campo idSessione di otp
 
         Otp otpToInvalidate = otpService.getOtpBySessionId(sessionId);
-        log.info("OTP da annullare: {}", otpToInvalidate.getOtp());
+        log.debug("OTP da annullare: {}", otpToInvalidate.getOtp());
         otpService.setOtpInvalid(otpToInvalidate);
 
         //creiamo il nuovo otp
@@ -302,36 +176,6 @@ public SecondStepVerifyOtpResponse secondStepVerifyOtp(SecondStepVerifyOtpReques
                 .build();
     }
 
-//    @Override
-//    public FirstStepVerifyTokenResponse firstStepVerifyToken(HttpSession session, HttpServletRequest request, HttpServletResponse response) {
-//        //voglio recuperarel 'access token
-//        String accessToken = jwtUtil.getAccessJwtFromHeader(request);
-//
-//
-//        if (accessToken == null || accessToken.isEmpty()) {
-//            log.error("Access token mancante");
-//            throw new MissingTokenException("Token mancante o inesistente");
-//        }
-//
-//        log.info("Access token: {}",accessToken);
-//
-//        try{
-//            jwtUtil.validateAccessToken(accessToken);
-//        }catch (ExpiredJwtException e){
-//            log.error("Access token scaduto, prova ottenimento nuovo tramite refresh token");
-//            throw new TokenExpiredException("Access token scaduto, prova ottenimento nuovo tramite refresh token");
-//        }
-//
-//        log.debug("Access token prima di estrarre lo username: {}", accessToken);
-//
-//        String username = jwtUtil.getUsernameFromAccessToken(accessToken);
-//        log.info("Username dall'accessToken: {}",username);
-//
-//        return FirstStepVerifyTokenResponse.builder()
-//                .username(username)
-//                .build();
-//    }
-
     @Override
     public FirstStepVerifyTokenResponse firstStepVerifyToken() {
         //voglio recuperarel 'access token
@@ -342,7 +186,7 @@ public SecondStepVerifyOtpResponse secondStepVerifyOtp(SecondStepVerifyOtpReques
             throw new MissingTokenException("Token mancante o inesistente");
         }
 
-        log.info("Access token: {}",accessToken);
+        log.debug("Access token: {}",accessToken);
 
         try{
             jwtService.validateRefreshToken(accessToken);
@@ -351,50 +195,13 @@ public SecondStepVerifyOtpResponse secondStepVerifyOtp(SecondStepVerifyOtpReques
             throw new TokenExpiredException("Access token scaduto, prova ottenimento nuovo tramite refresh token");
         }
 
-        log.debug("Access token prima di estrarre lo username: {}", accessToken);
-
         String username = jwtService.getUsernameFromAccessToken(accessToken);
-        log.info("Username dall'accessToken: {}",username);
+        log.debug("Username dall'accessToken: {}",username);
 
         return FirstStepVerifyTokenResponse.builder()
                 .username(username)
                 .build();
     }
-
-//    @Override
-//    public SecondStepGetAccessTokenByRefreshTokenResponse firstStepGetNewAccessToken(SecondStepGetAccessTokenByRefreshTokenRequest firstStepRequest, HttpServletRequest request, HttpSession session, HttpServletResponse response) {
-//        String refreshTokenString = jwtUtil.getRefreshJwtFromCookie(request);
-//
-//        if (refreshTokenString == null || refreshTokenString.isEmpty()) {
-//            log.error("Refresh token mancante");
-//            session.invalidate();
-//            response.setHeader("Set-Cookie", jwtUtil.getCleanRefreshTokenCookie().toString());
-//            throw new MissingTokenException("Refresh Token mancante, effettuare login");
-//        }
-//
-//        RefreshToken refreshToken = refreshTokenService.getRefreshTokenList(refreshTokenString);
-//
-//        log.info("Refresh token: {}",refreshTokenString);
-//
-//        if (!jwtUtil.validateRefreshToken(refreshTokenString)) {
-//            log.error("Refresh token non valido");
-//            refreshTokenService.invalidateRefreshToken(refreshToken);
-//            session.invalidate();
-//            response.setHeader("Set-Cookie", jwtUtil.getCleanRefreshTokenCookie().toString());
-//            throw new MissingTokenException("Refresh Token non valido, effettuare login");
-//        }
-//
-//        String username = refreshToken.getUser().getUsername();
-//
-//        String accessToken = jwtUtil.generateAccessToken(username);
-//        response.setHeader("Authorization", "Bearer " + accessToken);
-//        log.info("Access Token: {}", accessToken);
-//
-//        return SecondStepGetAccessTokenByRefreshTokenResponse.builder()
-//                .message("Access Token Rigenerato")
-//                .accessToken(accessToken)
-//                .build();
-//    }
 
     @Override
     public SecondStepGetAccessTokenByRefreshTokenResponse secondStepGetNewAccessToken(SecondStepGetAccessTokenByRefreshTokenRequest firstStepRequest) {
@@ -407,7 +214,7 @@ public SecondStepVerifyOtpResponse secondStepVerifyOtp(SecondStepVerifyOtpReques
 
         RefreshToken refreshToken = refreshTokenService.getRefreshTokenList(refreshTokenString);
 
-        log.info("Refresh token: {}",refreshTokenString);
+        log.debug("Refresh token: {}",refreshTokenString);
 
         if (!jwtUtil.validateRefreshToken(refreshTokenString)) {
             log.error("Refresh token non valido");
@@ -426,32 +233,6 @@ public SecondStepVerifyOtpResponse secondStepVerifyOtp(SecondStepVerifyOtpReques
                 .build();
     }
 
-
-//    @Override
-//    public FourthStepLogoutResponse firstStepLogout(HttpSession session, HttpServletResponse response, HttpServletRequest request) {
-//        String refreshTokenString = jwtUtil.getRefreshJwtFromCookie(request);
-//
-//        if (!(refreshTokenString == null || refreshTokenString.isEmpty())) {
-//            RefreshToken refreshToken = refreshTokenService.getRefreshTokenList(refreshTokenString);
-//            refreshTokenService.invalidateRefreshToken(refreshToken);
-//
-//            //sostiuisce il token con un token "con scadenza immediata, rimuovendolo
-//            response.setHeader("Set-Cookie", jwtUtil.getCleanRefreshTokenCookie().toString());
-//
-//        }
-//
-//        //prendi ed invalida l'access token
-//        response.setHeader("Authorization", "Bearer " + null);
-//
-//        //invalidazione della sessione :()
-//        session.invalidate();
-//
-//        log.info("Logged out successfully");
-//        return FourthStepLogoutResponse.builder()
-//                .message("Logout effettuato con successo. Token invalidati.")
-//                .build();
-//    }
-
     @Override
     public FourthStepLogoutResponse fourthStepLogout() {
         String refreshTokenString = jwtService.extractRefreshJwt();
@@ -461,10 +242,9 @@ public SecondStepVerifyOtpResponse secondStepVerifyOtp(SecondStepVerifyOtpReques
             refreshTokenService.invalidateRefreshToken(refreshToken);
         }
 
-        log.info("Logged out successfully");
+        log.debug("Logged out successfully");
         return FourthStepLogoutResponse.builder()
                 .message("Logout effettuato con successo. Token invalidati.")
                 .build();
     }
-
 }
