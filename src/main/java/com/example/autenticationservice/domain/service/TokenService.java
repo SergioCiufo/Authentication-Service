@@ -26,7 +26,7 @@ public class TokenService {
         LocalDateTime refreshTokenEnd = now.plus(maxAge);
 
         if(user == null) {
-            log.error("Utente non esistente");
+            log.error("User does not exist");
         }
 
         RefreshToken refreshJwt = new RefreshToken(null, user ,refreshToken, now, refreshTokenEnd, true);

@@ -53,7 +53,7 @@ public class AutenticationServiceImpl implements AutenticationService {
         registerService.registerUser(newUser);
 
         return StepRegisterResponse.builder()
-                .message("Registrazione effettuata")
+                .message("Registration completed")
                 .build();
     }
 
@@ -65,6 +65,7 @@ public class AutenticationServiceImpl implements AutenticationService {
 
         //!servizio db
         //validazione credenziali
+
         User user = userService.validateCredentials(username, password);
 
         //generazione otp
@@ -80,10 +81,10 @@ public class AutenticationServiceImpl implements AutenticationService {
         //invio opt per email
         emailService.sendEmail(user.getEmail(), "Chat4Me - OTP code", otp.getOtp());
 
-        log.info("OTP generato {} e inviato a: {}", otp.getOtp(), user.getEmail());
+        log.info("OTP generated {} and sent to: {}", otp.getOtp(), user.getEmail());
 
         return FirstStepLoginResponse.builder()
-                .message("Login effettuato, OTP inviato")
+                .message("Login successful, OTP sent")
                 .sessionId(sessionId)
                 .build();
     }
@@ -101,45 +102,43 @@ public class AutenticationServiceImpl implements AutenticationService {
         Otp checkOtp = otpService.getOtpBySessionId(sessionId);
 
         Integer otpAttempt = checkOtp.getAttempts();
-        //otpAttempt preso dalla sessione è null? allora imposta a 0, sennò metti il valore
+
+        //otpAttempt preso dal db è null? allora imposta a 0, sennò metti il valore (inutile poiché dovrebbe sempre esserci un valore)
         otpAttempt = (otpAttempt == null) ? 0 : otpAttempt;
 
         if (otpAttempt >= MAX_OTP_ATTEMPTS) {
             otpService.setOtpInvalid(checkOtp);
-            log.error("Tentativi inserimento OTP esauriti");
-            throw new ExpireOtpException("Tentativi inserimento OTP esauriti");
+            log.error("OTP entry attempts exhausted");
+            throw new ExpireOtpException("OTP entry attempts exhausted");
         }
 
         if (!checkOtp.getOtp().equals(otp)) {
             otpService.updateAttempt(checkOtp, otpAttempt + 1);
-            throw new InvalidCredentialsException("OTP non valido");
+            throw new InvalidCredentialsException("OTP not valid");
         }
 
         long otpExpireTime = checkOtp.getExpiresAt();
 
         if (otpUtil.isOtpExpired(otpExpireTime)) {
             otpService.setOtpInvalid(checkOtp);
-            log.error("OTP scaduto");
-            throw new ExpireOtpException("OTP scaduto");
+            log.error("OTP expired");
+            throw new ExpireOtpException("OTP expired");
         }
 
-        //String refreshToken = jwtService.generateRefreshToken(username);
         String refreshToken = refreshTokenJwt.generateToken(username);
 
-        //String accessToken = jwtUtil.generateAccessToken(username);
         String accessToken = accessTokenJwt.generateToken(username);
 
-        log.info("Access Token: {}", accessToken);
-        log.info("Refresh Token: {}", refreshToken);
+        log.debug("Access Token: {}", accessToken);
+        log.debug("Refresh Token: {}", refreshToken);
 
         User user = userService.getUserFromUsername(username);
         if (user == null) {
-            log.error("Utente non esistente");
+            log.error("User does not exist");
         }
 
-        //RefreshToken refreshJwt = refreshTokenService.addRefreshToken(refreshToken, user);
         RefreshToken refreshJwt = tokenService.addRefreshToken(refreshToken, user);
-        log.debug("Oggetto Refresh -> User: {}, Token: {}", refreshJwt.getUser().getUsername(), refreshJwt.getRefreshToken());
+        log.debug("Object RefreshToken -> User: {}, Token: {}", refreshJwt.getUser().getUsername(), refreshJwt.getRefreshToken());
 
         return SecondStepVerifyOtpResponse.builder()
                 .accessToken(accessToken)
@@ -154,17 +153,14 @@ public class AutenticationServiceImpl implements AutenticationService {
 
         //servzio db
         //ce lo prendiamo dal db tramite campo idSessione di otp
-
-        Otp otpToInvalidate = otpService.getOtpBySessionId(sessionId);
-        log.debug("OTP da annullare: {}", otpToInvalidate.getOtp());
-        otpService.setOtpInvalid(otpToInvalidate);
+        otpService.invalidateOtp(sessionId);
 
         //creiamo il nuovo otp
         User user = userService.getUserFromUsername(username);
 
         if (user == null) {
-            log.warn("Utente non trovato per username: {}", username);
-            throw new InvalidSessionException("Utente non valido o inesistente");
+            log.warn("User not found for username: {}", username);
+            throw new InvalidSessionException("Invalid or non-existent user");
         }
 
         Otp newOtp = otpService.generateOtp(user, sessionId);
@@ -178,7 +174,7 @@ public class AutenticationServiceImpl implements AutenticationService {
         log.info("New otp: {}", newOtp.getOtp());
 
         return ThirdStepResendOtpResponse.builder()
-                .message("Nuovo Otp inviato")
+                .message("New OTP sent")
                 .build();
     }
 
@@ -188,8 +184,8 @@ public class AutenticationServiceImpl implements AutenticationService {
         String accessToken = jwtService.extractAccessJwt();
 
         if (accessToken == null || accessToken.isEmpty()) {
-            log.error("Access token mancante");
-            throw new MissingTokenException("Token mancante o inesistente");
+            log.error("Missing Access token");
+            throw new MissingTokenException("Missing or non-existent token");
         }
 
         log.debug("Access token: {}", accessToken);
@@ -197,12 +193,12 @@ public class AutenticationServiceImpl implements AutenticationService {
         try {
             refreshTokenJwt.validateToken(accessToken);
         } catch (ExpiredJwtException e) {
-            log.error("Access token scaduto, prova ottenimento nuovo tramite refresh token");
-            throw new TokenExpiredException("Access token scaduto, prova ottenimento nuovo tramite refresh token");
+            log.error("Access token expired, attempting to obtain a new one via refresh token");
+            throw new TokenExpiredException("Access token expired, attempting to obtain a new one via refresh token");
         }
 
         String username = accessTokenJwt.getUsernameFromToken(accessToken);
-        log.debug("Username dall'accessToken: {}", username);
+        log.debug("Username from accessToken: {}", username);
 
         return FirstStepVerifyTokenResponse.builder()
                 .username(username)
@@ -214,29 +210,27 @@ public class AutenticationServiceImpl implements AutenticationService {
         String refreshTokenString = jwtService.extractRefreshJwt();
 
         if (refreshTokenString == null || refreshTokenString.isEmpty()) {
-            log.error("Refresh token mancante");
-            throw new MissingTokenException("Refresh Token mancante, effettuare login");
+            log.error("Missing Refresh token");
+            throw new MissingTokenException("Missing refresh token, please Login");
         }
 
-        //RefreshToken refreshToken = refreshTokenService.getRefreshTokenList(refreshTokenString);
         RefreshToken refreshToken = tokenService.getRefreshToken(refreshTokenString);
 
         log.debug("Refresh token: {}", refreshTokenString);
 
         if (!tokenService.validateRefreshToken(refreshTokenString)) {
-                log.error("Refresh token non valido");
-                throw new MissingTokenException("Refresh Token non valido, effettuare login");
+                log.error("Refresh token not valid");
+                throw new MissingTokenException("Missing refresh token, please Login");
         }
 
         String username = refreshToken.getUser().getUsername();
 
-        //String accessToken = jwtService.generateAccessToken(username);
         String accessToken = accessTokenJwt.generateToken(username);
 
         log.info("Access Token: {}", accessToken);
 
         return SecondStepGetAccessTokenByRefreshTokenResponse.builder()
-                .message("Access Token Rigenerato")
+                .message("Access Token regenerated")
                 .accessToken(accessToken)
                 .build();
     }
@@ -246,14 +240,12 @@ public class AutenticationServiceImpl implements AutenticationService {
         String refreshTokenString = jwtService.extractRefreshJwt();
 
         if (!(refreshTokenString == null || refreshTokenString.isEmpty())) {
-            //RefreshToken refreshToken = refreshTokenService.getRefreshTokenList(refreshTokenString);
-            //refreshTokenService.invalidateRefreshToken(refreshToken);
             tokenService.invalidateRefreshToken(refreshTokenString);
         }
 
         log.debug("Logged out successfully");
         return FourthStepLogoutResponse.builder()
-                .message("Logout effettuato con successo. Token invalidati.")
+                .message("Logout successful. Tokens invalidated.")
                 .build();
     }
 }

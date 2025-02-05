@@ -18,9 +18,6 @@ public class RefreshTokenJwt extends TokenManager {
     @Value("${spring.app.jwtSecret}")
     private String jwtSecret;
 
-    @Value("${spring.app.jwtRefreshCookieName}")
-    private String jwtRefreshCookie;
-
     @Value("${spring.app.jwtRefreshExpirations}")
     private int jwtRefreshExpireMs;
 

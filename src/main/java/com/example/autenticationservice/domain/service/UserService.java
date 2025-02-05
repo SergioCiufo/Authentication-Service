@@ -18,7 +18,7 @@ public class UserService {
         return userListUtil.getUserList().stream()
                 .filter(user -> user.getUsername().equals(username) && user.getPassword().equals(password))
                 .findFirst()
-                .orElseThrow(() -> new InvalidCredentialsException("Username o Password errati"));
+                .orElseThrow(() -> new InvalidCredentialsException("Incorrect username or password"));
     }
 
     public void add(User user) {

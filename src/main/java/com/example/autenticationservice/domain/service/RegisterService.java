@@ -23,9 +23,9 @@ public class RegisterService {
                 .anyMatch(user -> user.getEmail().equals(newUser.getEmail()));
 
         if (usernameExist) {
-            return "Username già in uso";
+            return "Username already in use";
         } else if (emailExist) {
-            return "Email già in uso";
+            return "Email already in use";
         }
 
         return null;

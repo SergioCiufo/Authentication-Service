@@ -5,6 +5,7 @@ import com.example.autenticationservice.domain.model.User;
 import com.example.autenticationservice.domain.util.OtpListUtil;
 import com.example.autenticationservice.domain.util.OtpUtil;
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
+@Log4j2
 public class OtpService {
     private final OtpListUtil otpListUtil;
     private final OtpUtil otpUtil;
@@ -57,5 +59,11 @@ public class OtpService {
         if (otp != null) {
             otp.setAttempts(attempt);
         }
+    }
+
+    public void invalidateOtp(String sessionId) {
+        Otp otpToInvalidate = getOtpBySessionId(sessionId);
+        log.debug("OTP to cancel: {}", otpToInvalidate.getOtp());
+        setOtpInvalid(otpToInvalidate);
     }
 }
