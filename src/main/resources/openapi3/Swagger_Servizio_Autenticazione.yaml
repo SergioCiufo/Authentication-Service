@@ -238,9 +238,12 @@ paths:
             schema:
               type: object
               properties:
-                sessionOtp:
+                username:
                   type: string
-                  example: "sessionOTP"  # sessionOtp associato alla sessione dell'utente
+                  example: "asuka"
+                sessionId:
+                  type: string
+                  example: "sessionId"  # sessionId associato alla sessione dell'utente //UUID
       responses:
         '200':
           description: OTP inviato con successo

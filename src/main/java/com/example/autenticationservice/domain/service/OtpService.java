@@ -1,5 +1,6 @@
 package com.example.autenticationservice.domain.service;
 
+import com.example.autenticationservice.domain.exceptions.InvalidSessionException;
 import com.example.autenticationservice.domain.model.Otp;
 import com.example.autenticationservice.domain.model.User;
 import com.example.autenticationservice.domain.util.OtpListUtil;
@@ -63,6 +64,9 @@ public class OtpService {
 
     public void invalidateOtp(String sessionId) {
         Otp otpToInvalidate = getOtpBySessionId(sessionId);
+        if (otpToInvalidate == null) {
+            throw new InvalidSessionException("Invalid or non-existent session");
+        }
         log.debug("OTP to cancel: {}", otpToInvalidate.getOtp());
         setOtpInvalid(otpToInvalidate);
     }

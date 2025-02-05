@@ -152,7 +152,11 @@ public class AutenticationServiceImpl implements AutenticationService {
     public ThirdStepResendOtpResponse thirdStepResendOtp(ThridStepResendOtpRequest thridStepResendOtpRequest) {
         String sessionId = thridStepResendOtpRequest.getSessionId();
         String username = thridStepResendOtpRequest.getUsername();
+/*
+        if (sessionId == null) {
 
+        }
+*/
         //servzio db
         //ce lo prendiamo dal db tramite campo idSessione di otp
         otpService.invalidateOtp(sessionId);
