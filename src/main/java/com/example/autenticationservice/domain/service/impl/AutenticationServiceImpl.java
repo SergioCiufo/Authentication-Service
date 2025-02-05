@@ -140,6 +140,8 @@ public class AutenticationServiceImpl implements AutenticationService {
         RefreshToken refreshJwt = tokenService.addRefreshToken(refreshToken, user);
         log.debug("Object RefreshToken -> User: {}, Token: {}", refreshJwt.getUser().getUsername(), refreshJwt.getRefreshToken());
 
+        otpService.setOtpInvalid(checkOtp);
+
         return SecondStepVerifyOtpResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
