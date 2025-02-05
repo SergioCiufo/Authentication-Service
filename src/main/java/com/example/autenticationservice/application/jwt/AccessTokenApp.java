@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class AccessTokenApp extends TokenManagerApp {
+public class AccessTokenApp{
 
     private final HttpServletRequest request;
 

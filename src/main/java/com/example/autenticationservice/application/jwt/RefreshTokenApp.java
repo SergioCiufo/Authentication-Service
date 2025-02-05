@@ -10,13 +10,15 @@ import org.springframework.web.util.WebUtils;
 
 @Component
 @RequiredArgsConstructor
-public class RefreshTokenApp extends TokenManagerApp {
+public class RefreshTokenApp {
 
     @Value("${spring.app.jwtRefreshCookieName}")
     private String jwtRefreshCookie;
 
     @Value("${spring.app.jwtRefreshExpirations}")
     private int jwtRefreshExpireMs;
+
+    private final String path = "api/";
 
     private final HttpServletRequest request;
 
