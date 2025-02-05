@@ -25,4 +25,24 @@ public class RefreshTokenListUtil {
     public List<RefreshToken> getRefreshTokenList() {
         return refreshTokenList;
     }
+
+    public void add(RefreshToken refreshToken) {
+        refreshTokenList.add(refreshToken);
+    }
+
+    public RefreshToken getRefreshToken(String refreshTokenString) {
+        List<RefreshToken> refreshTokenList = getRefreshTokenList();
+
+        return refreshTokenList.stream()
+                .filter(refToken -> refToken.getRefreshToken().equals(refreshTokenString))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public void invalidate(String refreshToken) {
+        RefreshToken refreshTokeToInvalidate = getRefreshToken(refreshToken);
+        if(refreshTokeToInvalidate != null) {
+            refreshTokeToInvalidate.setValid(false);
+        }
+    }
 }

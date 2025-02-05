@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor //costruttore con tutti i parametri
 @NoArgsConstructor //costruttore vuoto
 //@Entity
-//@Table(name = "RefreshTokenJwt")
+//@Table(name = "RefreshTokenApp")
 public class RefreshToken {
     //@Id
     //@GeneratedValue(strategy = GenerationType.IDENTITY)

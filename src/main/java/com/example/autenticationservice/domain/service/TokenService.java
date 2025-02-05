@@ -10,15 +10,14 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @AllArgsConstructor
 @Log4j2
-public class RefreshTokenService {
+public class TokenService {
     private final RefreshTokenListUtil refreshTokenListUtil;
     private final RefreshTokenJwt refreshTokenJwt;
-/*
+
     public RefreshToken addRefreshToken(String refreshToken, User user) {
         int maxAgeInt = refreshTokenJwt.getExpirationDate();
         Duration maxAge = Duration.ofSeconds(maxAgeInt);
@@ -31,26 +30,19 @@ public class RefreshTokenService {
         }
 
         RefreshToken refreshJwt = new RefreshToken(null, user ,refreshToken, now, refreshTokenEnd, true);
-        refreshTokenListUtil.getRefreshTokenList().add(refreshJwt);
+        refreshTokenListUtil.add(refreshJwt);
         return refreshJwt;
     }
-*/
-    /*
-    public RefreshToken getRefreshTokenList(String refreshTokenString) {
-        List<RefreshToken> refreshTokenList = refreshTokenListUtil.getRefreshTokenList();
 
-        return refreshTokenList.stream()
-                .filter(refToken -> refToken.getRefreshToken().equals(refreshTokenString))
-                .findFirst()
-                .orElse(null);
+    public RefreshToken getRefreshToken(String refreshTokenString) {
+        return refreshTokenListUtil.getRefreshToken(refreshTokenString);
     }
 
-     */
-/*
-    public void invalidateRefreshToken(RefreshToken refreshToken) {
-        if(refreshToken != null) {
-            refreshToken.setValid(false);
-        }
+    public void invalidateRefreshToken(String refreshToken) {
+        refreshTokenListUtil.invalidate(refreshToken);
     }
-*/
+
+    public boolean validateRefreshToken(String token) {
+        return refreshTokenJwt.validateToken(token);
+    }
 }

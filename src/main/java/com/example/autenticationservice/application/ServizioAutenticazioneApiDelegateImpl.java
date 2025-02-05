@@ -2,7 +2,6 @@ package com.example.autenticationservice.application;
 
 import com.example.autenticationservice.application.mapper.*;
 import com.example.autenticationservice.application.service.JwtServiceImpl;
-import com.example.autenticationservice.application.service.SessionService;
 import com.example.autenticationservice.domain.model.autentication.ThirdStepResendOtpResponse;
 import com.example.autenticationservice.domain.model.autentication.ThridStepResendOtpRequest;
 import com.example.autenticationservice.domain.model.register.StepRegisterRequest;
@@ -34,7 +33,6 @@ public class ServizioAutenticazioneApiDelegateImpl implements ServizioAutenticaz
 
     private final AutenticationMappers autenticationMappers;
     private final AutenticationService autenticationService;
-    private final SessionService sessionService;
     private final JwtServiceImpl jwtServiceImpl;
 
     @Override
@@ -47,15 +45,10 @@ public class ServizioAutenticazioneApiDelegateImpl implements ServizioAutenticaz
 
     @Override
     public ResponseEntity<Login200Response> login(LoginRequest loginRequest){
-        //prendiamo la sessione e la settiamo nella request
-        //String sessionId = sessionService.getSessionId();
         String sessionId = UUID.randomUUID().toString(); //si utilizza per creare stringhe randomiche al posto del sessionID
         FirstStepLoginRequest request = autenticationMappers.convertToDomain(loginRequest, sessionId);
 
         FirstStepLoginResponse response = autenticationService.firstStepLogin(request);
-
-        //prendiamo l'username
-        //sessionService.setUsername(request.getUsername());
 
         Login200Response convertedResponse = autenticationMappers.convertFromDomain(response);
         return ResponseEntity.ok(convertedResponse);
@@ -64,21 +57,11 @@ public class ServizioAutenticazioneApiDelegateImpl implements ServizioAutenticaz
     @Override
     public ResponseEntity<VerifyOTP200Response> verifyOTP(VerifyOTPRequest verifyOTPRequest){
         SecondStepVerifyOtpRequest request = autenticationMappers.convertToDomain(verifyOTPRequest);
-
-        //prendiamo la sessione e la settiamo nella request
-        //String sessionId = sessionService.getSessionId();
-        //request.setSessionId(sessionId);
-
-        //String username = sessionService.getUsername();
-        //request.setUsername(username);
-
         SecondStepVerifyOtpResponse response = autenticationService.secondStepVerifyOtp(request);
 
         //impostiamo l'accessToken nell'header (bearer token)
         jwtServiceImpl.setAuthorizationHeader(response.getAccessToken());
-        jwtServiceImpl.generateRefreshCookie(request.getUsername());
-
-        //sessionService.removeUsername();
+        jwtServiceImpl.generateRefreshCookie(response.getRefreshToken());
 
         VerifyOTP200Response convertedResponse = autenticationMappers.convertFromDomain(response);
         return ResponseEntity.ok(convertedResponse);
@@ -87,14 +70,6 @@ public class ServizioAutenticazioneApiDelegateImpl implements ServizioAutenticaz
     @Override
     public ResponseEntity<ReSendOtp200Response> reSendOtp(ReSendOtpRequest reSendOtpRequest){
         ThridStepResendOtpRequest request = autenticationMappers.convertToDomain(reSendOtpRequest);
-
-        //prendiamo la sessione e la settiamo nella request
-        //String sessionId = sessionService.getSessionId();
-        //request.setSessionId(sessionId);
-
-        //String username = sessionService.getUsername();
-        //request.setUsername(username);
-
         ThirdStepResendOtpResponse response = autenticationService.thirdStepResendOtp(request);
         ReSendOtp200Response convertedResponse = autenticationMappers.convertFromDomain(response);
         return ResponseEntity.ok(convertedResponse);
@@ -122,8 +97,6 @@ public class ServizioAutenticazioneApiDelegateImpl implements ServizioAutenticaz
     @Override
     public ResponseEntity<Logout200Response> logout(){
         FourthStepLogoutResponse response = autenticationService.fourthStepLogout();
-
-        //sessionService.invalidateSession();
 
         ResponseCookie cleanRefreshCookie = jwtServiceImpl.getCleanJwtCookie();
 

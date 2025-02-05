@@ -1,7 +1,6 @@
 package com.example.autenticationservice.application.exceptions;
 
-import com.example.autenticationservice.application.jwt.RefreshTokenJwt;
-import com.example.autenticationservice.application.service.SessionService;
+import com.example.autenticationservice.application.jwt.RefreshTokenApp;
 import com.example.autenticationservice.domain.exceptions.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -18,8 +17,7 @@ import org.springframework.web.context.request.WebRequest;
 @RequiredArgsConstructor
 public class AutenticationServiceExceptionHandler {
 
-    private SessionService sessionService;
-    private RefreshTokenJwt refreshTokenJwt;
+    private RefreshTokenApp refreshTokenApp;
 
     private void logError(Exception ex, WebRequest request) {
         log.error(
@@ -54,7 +52,6 @@ public class AutenticationServiceExceptionHandler {
     @ExceptionHandler({ExpireOtpException.class})
     public ResponseEntity<Object> handleExpireOtpException(ExpireOtpException ex, WebRequest request) {
         logError(ex, request);
-        //sessionService.invalidateSession(); //todo controllare se la posizione va bene
         return ResponseEntity
                 .status(401)
                 .body(ex.getMessage());
@@ -64,8 +61,7 @@ public class AutenticationServiceExceptionHandler {
     public ResponseEntity<Object> handleMissingTokenException(MissingTokenException ex, WebRequest request) {
         logError(ex, request);
 
-        //sessionService.invalidateSession(); //todo controllare se la posizione va bene
-        ResponseCookie cleanRefreshCookie = refreshTokenJwt.getCleanJwtCookie(); //todo da controllare
+        ResponseCookie cleanRefreshCookie = refreshTokenApp.getCleanJwtCookie();
 
         return ResponseEntity
                 .status(401)

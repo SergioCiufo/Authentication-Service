@@ -3,6 +3,8 @@ package com.example.autenticationservice.domain.service.impl;
 import com.example.autenticationservice.domain.api.EmailService;
 import com.example.autenticationservice.domain.api.JwtService;
 import com.example.autenticationservice.domain.exceptions.*;
+import com.example.autenticationservice.domain.jwt.AccessTokenJwt;
+import com.example.autenticationservice.domain.jwt.RefreshTokenJwt;
 import com.example.autenticationservice.domain.model.autentication.*;
 import com.example.autenticationservice.domain.model.register.StepRegisterResponse;
 import com.example.autenticationservice.domain.model.verifyToken.SecondStepGetAccessTokenByRefreshTokenRequest;
@@ -13,7 +15,6 @@ import com.example.autenticationservice.domain.model.User;
 import com.example.autenticationservice.domain.model.register.StepRegisterRequest;
 import com.example.autenticationservice.domain.model.verifyToken.FirstStepVerifyTokenResponse;
 import com.example.autenticationservice.domain.service.*;
-import com.example.autenticationservice.domain.util.JwtUtil;
 import com.example.autenticationservice.domain.util.OtpUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.AllArgsConstructor;
@@ -32,9 +33,11 @@ public class AutenticationServiceImpl implements AutenticationService {
     private final EmailService emailService;
     private final OtpUtil otpUtil;
     private final OtpService otpService;
-    private final JwtUtil jwtUtil;
-    private final RefreshTokenService refreshTokenService;
+    private final RefreshTokenJwt refreshTokenJwt;
+    private final AccessTokenJwt accessTokenJwt;
     private final JwtService jwtService;
+    private final TokenService tokenService;
+
 
     @Override
     public StepRegisterResponse register(StepRegisterRequest stepRegisterRequest) {
@@ -85,61 +88,64 @@ public class AutenticationServiceImpl implements AutenticationService {
                 .build();
     }
 
-@Override
-public SecondStepVerifyOtpResponse secondStepVerifyOtp(SecondStepVerifyOtpRequest secondStepVerifyOtpRequest) {
-    String otp = secondStepVerifyOtpRequest.getOtp();
-    String sessionId = secondStepVerifyOtpRequest.getSessionId();
-    String username = secondStepVerifyOtpRequest.getUsername();
+    @Override
+    public SecondStepVerifyOtpResponse secondStepVerifyOtp(SecondStepVerifyOtpRequest secondStepVerifyOtpRequest) {
+        String otp = secondStepVerifyOtpRequest.getOtp();
+        String sessionId = secondStepVerifyOtpRequest.getSessionId();
+        String username = secondStepVerifyOtpRequest.getUsername();
 
-    //parte logica persistenza
+        //parte logica persistenza
 
-    final int MAX_OTP_ATTEMPTS = 3;
+        final int MAX_OTP_ATTEMPTS = 3;
 
-    Otp checkOtp = otpService.getOtpBySessionId(sessionId);
+        Otp checkOtp = otpService.getOtpBySessionId(sessionId);
 
-    Integer otpAttempt = checkOtp.getAttempts();
-    //otpAttempt preso dalla sessione è null? allora imposta a 0, sennò metti il valore
-    otpAttempt = (otpAttempt == null) ? 0 : otpAttempt;
+        Integer otpAttempt = checkOtp.getAttempts();
+        //otpAttempt preso dalla sessione è null? allora imposta a 0, sennò metti il valore
+        otpAttempt = (otpAttempt == null) ? 0 : otpAttempt;
 
-    if (otpAttempt >= MAX_OTP_ATTEMPTS){
-        otpService.setOtpInvalid(checkOtp);
-        log.error("Tentativi inserimento OTP esauriti");
-        throw new ExpireOtpException("Tentativi inserimento OTP esauriti");
+        if (otpAttempt >= MAX_OTP_ATTEMPTS) {
+            otpService.setOtpInvalid(checkOtp);
+            log.error("Tentativi inserimento OTP esauriti");
+            throw new ExpireOtpException("Tentativi inserimento OTP esauriti");
+        }
+
+        if (!checkOtp.getOtp().equals(otp)) {
+            otpService.updateAttempt(checkOtp, otpAttempt + 1);
+            throw new InvalidCredentialsException("OTP non valido");
+        }
+
+        long otpExpireTime = checkOtp.getExpiresAt();
+
+        if (otpUtil.isOtpExpired(otpExpireTime)) {
+            otpService.setOtpInvalid(checkOtp);
+            log.error("OTP scaduto");
+            throw new ExpireOtpException("OTP scaduto");
+        }
+
+        //String refreshToken = jwtService.generateRefreshToken(username);
+        String refreshToken = refreshTokenJwt.generateToken(username);
+
+        //String accessToken = jwtUtil.generateAccessToken(username);
+        String accessToken = accessTokenJwt.generateToken(username);
+
+        log.info("Access Token: {}", accessToken);
+        log.info("Refresh Token: {}", refreshToken);
+
+        User user = userService.getUserFromUsername(username);
+        if (user == null) {
+            log.error("Utente non esistente");
+        }
+
+        //RefreshToken refreshJwt = refreshTokenService.addRefreshToken(refreshToken, user);
+        RefreshToken refreshJwt = tokenService.addRefreshToken(refreshToken, user);
+        log.debug("Oggetto Refresh -> User: {}, Token: {}", refreshJwt.getUser().getUsername(), refreshJwt.getRefreshToken());
+
+        return SecondStepVerifyOtpResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
-
-    if (!checkOtp.getOtp().equals(otp)) {
-        otpService.updateAttempt(checkOtp, otpAttempt+1);
-        throw new InvalidCredentialsException("OTP non valido");
-    }
-
-    long otpExpireTime = checkOtp.getExpiresAt();
-
-    if (otpUtil.isOtpExpired(otpExpireTime)) {
-        otpService.setOtpInvalid(checkOtp);
-        log.error("OTP scaduto");
-        throw new ExpireOtpException("OTP scaduto");
-    }
-
-    String refreshToken = jwtService.generateRefreshToken(username);
-
-    String accessToken = jwtUtil.generateAccessToken(username);
-
-    log.info("Access Token: {}", accessToken);
-    log.info("Refresh Token: {}", refreshToken);
-
-    User user = userService.getUserFromUsername(username);
-    if(user == null) {
-        log.error("Utente non esistente");
-    }
-
-    RefreshToken refreshJwt = refreshTokenService.addRefreshToken(refreshToken, user);
-    log.debug("Oggetto Refresh -> User: {}, Token: {}", refreshJwt.getUser().getUsername(), refreshJwt.getRefreshToken());
-
-    return SecondStepVerifyOtpResponse.builder()
-            .accessToken(accessToken)
-            .refreshToken(refreshToken)
-            .build();
-}
 
     @Override
     public ThirdStepResendOtpResponse thirdStepResendOtp(ThridStepResendOtpRequest thridStepResendOtpRequest) {
@@ -156,7 +162,7 @@ public SecondStepVerifyOtpResponse secondStepVerifyOtp(SecondStepVerifyOtpReques
         //creiamo il nuovo otp
         User user = userService.getUserFromUsername(username);
 
-        if(user == null) {
+        if (user == null) {
             log.warn("Utente non trovato per username: {}", username);
             throw new InvalidSessionException("Utente non valido o inesistente");
         }
@@ -186,17 +192,17 @@ public SecondStepVerifyOtpResponse secondStepVerifyOtp(SecondStepVerifyOtpReques
             throw new MissingTokenException("Token mancante o inesistente");
         }
 
-        log.debug("Access token: {}",accessToken);
+        log.debug("Access token: {}", accessToken);
 
-        try{
-            jwtService.validateRefreshToken(accessToken);
-        }catch (ExpiredJwtException e){
+        try {
+            refreshTokenJwt.validateToken(accessToken);
+        } catch (ExpiredJwtException e) {
             log.error("Access token scaduto, prova ottenimento nuovo tramite refresh token");
             throw new TokenExpiredException("Access token scaduto, prova ottenimento nuovo tramite refresh token");
         }
 
-        String username = jwtService.getUsernameFromAccessToken(accessToken);
-        log.debug("Username dall'accessToken: {}",username);
+        String username = accessTokenJwt.getUsernameFromToken(accessToken);
+        log.debug("Username dall'accessToken: {}", username);
 
         return FirstStepVerifyTokenResponse.builder()
                 .username(username)
@@ -212,18 +218,20 @@ public SecondStepVerifyOtpResponse secondStepVerifyOtp(SecondStepVerifyOtpReques
             throw new MissingTokenException("Refresh Token mancante, effettuare login");
         }
 
-        RefreshToken refreshToken = refreshTokenService.getRefreshTokenList(refreshTokenString);
+        //RefreshToken refreshToken = refreshTokenService.getRefreshTokenList(refreshTokenString);
+        RefreshToken refreshToken = tokenService.getRefreshToken(refreshTokenString);
 
-        log.debug("Refresh token: {}",refreshTokenString);
+        log.debug("Refresh token: {}", refreshTokenString);
 
-        if (!jwtUtil.validateRefreshToken(refreshTokenString)) {
-            log.error("Refresh token non valido");
-            throw new MissingTokenException("Refresh Token non valido, effettuare login");
+        if (!tokenService.validateRefreshToken(refreshTokenString)) {
+                log.error("Refresh token non valido");
+                throw new MissingTokenException("Refresh Token non valido, effettuare login");
         }
 
         String username = refreshToken.getUser().getUsername();
 
-        String accessToken = jwtService.generateAccessToken(username);
+        //String accessToken = jwtService.generateAccessToken(username);
+        String accessToken = accessTokenJwt.generateToken(username);
 
         log.info("Access Token: {}", accessToken);
 
@@ -238,8 +246,9 @@ public SecondStepVerifyOtpResponse secondStepVerifyOtp(SecondStepVerifyOtpReques
         String refreshTokenString = jwtService.extractRefreshJwt();
 
         if (!(refreshTokenString == null || refreshTokenString.isEmpty())) {
-            RefreshToken refreshToken = refreshTokenService.getRefreshTokenList(refreshTokenString);
-            refreshTokenService.invalidateRefreshToken(refreshToken);
+            //RefreshToken refreshToken = refreshTokenService.getRefreshTokenList(refreshTokenString);
+            //refreshTokenService.invalidateRefreshToken(refreshToken);
+            tokenService.invalidateRefreshToken(refreshTokenString);
         }
 
         log.debug("Logged out successfully");
