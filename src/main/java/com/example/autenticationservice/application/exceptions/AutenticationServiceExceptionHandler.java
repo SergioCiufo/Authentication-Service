@@ -54,7 +54,7 @@ public class AutenticationServiceExceptionHandler {
     @ExceptionHandler({ExpireOtpException.class})
     public ResponseEntity<Object> handleExpireOtpException(ExpireOtpException ex, WebRequest request) {
         logError(ex, request);
-        sessionService.invalidateSession(); //todo controllare se la posizione va bene
+        //sessionService.invalidateSession(); //todo controllare se la posizione va bene
         return ResponseEntity
                 .status(401)
                 .body(ex.getMessage());
@@ -64,7 +64,7 @@ public class AutenticationServiceExceptionHandler {
     public ResponseEntity<Object> handleMissingTokenException(MissingTokenException ex, WebRequest request) {
         logError(ex, request);
 
-        sessionService.invalidateSession(); //todo controllare se la posizione va bene
+        //sessionService.invalidateSession(); //todo controllare se la posizione va bene
         ResponseCookie cleanRefreshCookie = refreshTokenJwt.getCleanJwtCookie(); //todo da controllare
 
         return ResponseEntity

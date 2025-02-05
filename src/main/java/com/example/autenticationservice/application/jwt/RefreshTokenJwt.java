@@ -51,14 +51,14 @@ public class RefreshTokenJwt extends TokenManager {
                 .setExpiration(new Date(System.currentTimeMillis() + jwtRefreshExpireMs))
                 .signWith(key(), SignatureAlgorithm.HS512)
                 .compact();
-    }
+    } //non deve stare nell'application
 
     //Restituisce la chiave segreta utilizzata per firmare e verificare i JWT
     //Utilizza Keys.hmacShaKeyFor per decodificare il segreto base64 configurato
     @Override
     public Key key() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
-    }
+    } //domain
 
     public ResponseCookie generateCookie(String username) {
         String token = generateToken(username);

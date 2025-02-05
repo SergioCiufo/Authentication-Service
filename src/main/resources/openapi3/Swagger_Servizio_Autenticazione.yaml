@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Chat4Me
+  title: Chat4Me - Autentication Service
   description: |
     Chat4Me è un'app di messaggistica basata su microservizi, sviluppata con SpringBoot, progettata per interagire tramite API Rest.
     - Servizio Messaggistica per la lettura/scrittura messaggi
@@ -93,9 +93,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  sessionOtp:
+                  sessionId:
                     type: string
-                    example: "sessionOTP"  # sessionOtp non visibile all'utente
+                    example: "sessionId"  # sessionId non visibile all'utente UUID
                   message:
                     type: string
                     example: "OTP inviato con successo tramite mail o console"
@@ -107,7 +107,7 @@ paths:
       tags:
         - Servizio Autenticazione
       summary: Verifica OTP
-      description: Verifica l'OTP inviato tramite email ed il sessionOTP e restituisce un token JWT se valido.
+      description: Verifica l'OTP inviato tramite email ed il sessionId e restituisce un token JWT se valido.
       operationId: verifyOTP
       requestBody:
         required: true
@@ -116,12 +116,15 @@ paths:
             schema:
               type: object
               properties:
+                username:
+                  type: string
+                  example: "asuka"
                 otp:
                   type: string
                   example: "OTP by mail"  # OTP inviato via email
-                sessionOtp:
+                sessionId:
                   type: string
-                  example: "sessionOTP"  # sessionOtp associato alla sessione dell'utente
+                  example: "sessionId"  # sessionId associato alla sessione dell'utente UUID
       responses:
         '200':
           description: OTP verificato con successo, token JWT generato
@@ -130,7 +133,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  token:
+                  accessToken:
+                    type: string
+                    example: "macarenaToken."  # Il JWT token
+                  refreshToken:
                     type: string
                     example: "macarenaToken."  # Il JWT token
         '401':

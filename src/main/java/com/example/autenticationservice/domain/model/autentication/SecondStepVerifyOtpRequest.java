@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SecondStepVerifyOtpRequest {
     private String otp;
-    private String sessionId; //andrebbe rimosso poiché non è un dato che deve inviare il client
+    private String sessionId;
     private String username;
 }

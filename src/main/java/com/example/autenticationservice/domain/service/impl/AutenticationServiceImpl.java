@@ -58,7 +58,7 @@ public class AutenticationServiceImpl implements AutenticationService {
     public FirstStepLoginResponse firstStepLogin(FirstStepLoginRequest firstStepLoginRequest) {
         String username = firstStepLoginRequest.getUsername();
         String password = firstStepLoginRequest.getPassword();
-        String sessionId = firstStepLoginRequest.getSessionId();
+        String sessionId = firstStepLoginRequest.getSessionId(); //UUID
 
         //!servizio db
         //validazione credenziali

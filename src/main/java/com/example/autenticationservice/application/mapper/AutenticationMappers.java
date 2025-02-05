@@ -24,8 +24,8 @@ public interface AutenticationMappers {
     Register200Response convertFromDomain(StepRegisterResponse response);
 
     //LOGIN
-    FirstStepLoginRequest convertToDomain(LoginRequest request);
-    @Mapping(target = "sessionOtp", source = "response.sessionId")
+    FirstStepLoginRequest convertToDomain(LoginRequest request, String sessionId);
+    //@Mapping(target = "sessionOtp", source = "response.sessionId") //si usa per cambiare nome dallo swagger alla classe response
     Login200Response convertFromDomain(FirstStepLoginResponse response);
 
     //VERIFY OTP
