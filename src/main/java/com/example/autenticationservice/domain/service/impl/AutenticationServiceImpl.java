@@ -7,13 +7,13 @@ import com.example.autenticationservice.domain.jwt.AccessTokenJwt;
 import com.example.autenticationservice.domain.jwt.RefreshTokenJwt;
 import com.example.autenticationservice.domain.model.autentication.*;
 import com.example.autenticationservice.domain.model.register.StepRegisterResponse;
-import com.example.autenticationservice.domain.model.verifyToken.SecondStepGetAccessTokenByRefreshTokenRequest;
-import com.example.autenticationservice.domain.model.verifyToken.SecondStepGetAccessTokenByRefreshTokenResponse;
+import com.example.autenticationservice.domain.model.verifyToken.GetAccessTokenByRefreshTokenRequest;
+import com.example.autenticationservice.domain.model.verifyToken.GetAccessTokenByRefreshTokenResponse;
 import com.example.autenticationservice.domain.model.Otp;
 import com.example.autenticationservice.domain.model.RefreshToken;
 import com.example.autenticationservice.domain.model.User;
 import com.example.autenticationservice.domain.model.register.StepRegisterRequest;
-import com.example.autenticationservice.domain.model.verifyToken.FirstStepVerifyTokenResponse;
+import com.example.autenticationservice.domain.model.verifyToken.VerifyTokenResponse;
 import com.example.autenticationservice.domain.service.*;
 import com.example.autenticationservice.domain.util.OtpUtil;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -91,10 +91,10 @@ public class AutenticationServiceImpl implements AutenticationService {
     }
 
     @Override
-    public SecondStepVerifyOtpResponse secondStepVerifyOtp(SecondStepVerifyOtpRequest secondStepVerifyOtpRequest) {
-        String otp = secondStepVerifyOtpRequest.getOtp();
-        String sessionId = secondStepVerifyOtpRequest.getSessionId();
-        String username = secondStepVerifyOtpRequest.getUsername();
+    public SecondStepLoginResponse secondStepVerifyOtp(SecondStepLoginRequest secondStepLoginRequest) {
+        String otp = secondStepLoginRequest.getOtp();
+        String sessionId = secondStepLoginRequest.getSessionId();
+        String username = secondStepLoginRequest.getUsername();
 
         //parte logica persistenza
 
@@ -143,16 +143,16 @@ public class AutenticationServiceImpl implements AutenticationService {
 
         otpService.setOtpInvalid(checkOtp);
 
-        return SecondStepVerifyOtpResponse.builder()
+        return SecondStepLoginResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
     }
 
     @Override
-    public ThirdStepResendOtpResponse thirdStepResendOtp(ThridStepResendOtpRequest thridStepResendOtpRequest) {
-        String sessionId = thridStepResendOtpRequest.getSessionId();
-        String username = thridStepResendOtpRequest.getUsername();
+    public ResendOtpResponse thirdStepResendOtp(ResendOtpRequest resendOtpRequest) {
+        String sessionId = resendOtpRequest.getSessionId();
+        String username = resendOtpRequest.getUsername();
 /*
         if (sessionId == null) {
 
@@ -180,13 +180,13 @@ public class AutenticationServiceImpl implements AutenticationService {
 
         log.info("New otp: {}", newOtp.getOtp());
 
-        return ThirdStepResendOtpResponse.builder()
+        return ResendOtpResponse.builder()
                 .message("New OTP sent")
                 .build();
     }
 
     @Override
-    public FirstStepVerifyTokenResponse firstStepVerifyToken() {
+    public VerifyTokenResponse firstStepVerifyToken() {
         //voglio recuperarel 'access token
         String accessToken = jwtService.extractAccessJwt();
 
@@ -207,13 +207,13 @@ public class AutenticationServiceImpl implements AutenticationService {
         String username = accessTokenJwt.getUsernameFromToken(accessToken);
         log.debug("Username from accessToken: {}", username);
 
-        return FirstStepVerifyTokenResponse.builder()
+        return VerifyTokenResponse.builder()
                 .username(username)
                 .build();
     }
 
     @Override
-    public SecondStepGetAccessTokenByRefreshTokenResponse secondStepGetNewAccessToken(SecondStepGetAccessTokenByRefreshTokenRequest firstStepRequest) {
+    public GetAccessTokenByRefreshTokenResponse secondStepGetNewAccessToken(GetAccessTokenByRefreshTokenRequest firstStepRequest) {
         String refreshTokenString = jwtService.extractRefreshJwt();
 
         if (refreshTokenString == null || refreshTokenString.isEmpty()) {
@@ -236,14 +236,14 @@ public class AutenticationServiceImpl implements AutenticationService {
 
         log.info("Access Token: {}", accessToken);
 
-        return SecondStepGetAccessTokenByRefreshTokenResponse.builder()
+        return GetAccessTokenByRefreshTokenResponse.builder()
                 .message("Access Token regenerated")
                 .accessToken(accessToken)
                 .build();
     }
 
     @Override
-    public FourthStepLogoutResponse fourthStepLogout() {
+    public LogoutResponse fourthStepLogout() {
         String refreshTokenString = jwtService.extractRefreshJwt();
 
         if (!(refreshTokenString == null || refreshTokenString.isEmpty())) {
@@ -251,7 +251,7 @@ public class AutenticationServiceImpl implements AutenticationService {
         }
 
         log.debug("Logged out successfully");
-        return FourthStepLogoutResponse.builder()
+        return LogoutResponse.builder()
                 .message("Logout successful. Tokens invalidated.")
                 .build();
     }

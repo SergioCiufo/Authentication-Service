@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true) //interfaccia differente e fluida per settare parametri //tobuilder da una classe di creare il builder
 @AllArgsConstructor //costruttore con tutti i parametri
 @NoArgsConstructor //costruttore vuoto
-public class ThridStepResendOtpRequest {
+public class ResendOtpRequest {
     String sessionId;
     String username;
 }

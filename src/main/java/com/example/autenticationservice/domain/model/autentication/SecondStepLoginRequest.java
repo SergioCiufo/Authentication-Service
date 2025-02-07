@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class SecondStepVerifyOtpRequest {
+public class SecondStepLoginRequest {
     private String otp;
     private String sessionId;
     private String username;

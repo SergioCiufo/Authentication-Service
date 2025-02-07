@@ -1,20 +1,14 @@
 package com.example.autenticationservice.application.mapper;
 
-import com.example.autenticationservice.domain.model.autentication.FourthStepLogoutResponse;
+import com.example.autenticationservice.domain.model.autentication.*;
 import com.example.autenticationservice.domain.model.register.StepRegisterResponse;
-import com.example.autenticationservice.domain.model.verifyToken.SecondStepGetAccessTokenByRefreshTokenRequest;
-import com.example.autenticationservice.domain.model.verifyToken.SecondStepGetAccessTokenByRefreshTokenResponse;
-import com.example.autenticationservice.domain.model.autentication.ThridStepResendOtpRequest;
-import com.example.autenticationservice.domain.model.autentication.ThirdStepResendOtpResponse;
-import com.example.autenticationservice.domain.model.autentication.FirstStepLoginRequest;
-import com.example.autenticationservice.domain.model.autentication.FirstStepLoginResponse;
+import com.example.autenticationservice.domain.model.verifyToken.GetAccessTokenByRefreshTokenRequest;
+import com.example.autenticationservice.domain.model.verifyToken.GetAccessTokenByRefreshTokenResponse;
 import com.example.autenticationservice.domain.model.register.StepRegisterRequest;
-import com.example.autenticationservice.domain.model.autentication.SecondStepVerifyOtpRequest;
-import com.example.autenticationservice.domain.model.autentication.SecondStepVerifyOtpResponse;
-import com.example.autenticationservice.domain.model.verifyToken.FirstStepVerifyTokenResponse;
+import com.example.autenticationservice.domain.model.autentication.SecondStepLoginRequest;
+import com.example.autenticationservice.domain.model.verifyToken.VerifyTokenResponse;
 import com.example.autenticationservice.generated.application.model.*;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 @Mapper
 public interface AutenticationMappers {
@@ -30,21 +24,21 @@ public interface AutenticationMappers {
     Login200Response convertFromDomain(FirstStepLoginResponse response);
 
     //VERIFY OTP
-    SecondStepVerifyOtpRequest convertToDomain(VerifyOTPRequest verifyOTPRequest);
-    VerifyOTP200Response convertFromDomain(SecondStepVerifyOtpResponse secondStepVerifyOtpResponse);
+    SecondStepLoginRequest convertToDomain(VerifyOTPRequest verifyOTPRequest);
+    VerifyOTP200Response convertFromDomain(SecondStepLoginResponse secondStepLoginResponse);
 
     //RE-SEND OTP
-    ThridStepResendOtpRequest convertToDomain(ReSendOtpRequest request);
-    ReSendOtp200Response convertFromDomain(ThirdStepResendOtpResponse resendOtpResponse);
+    ResendOtpRequest convertToDomain(ReSendOtpRequest request);
+    ReSendOtp200Response convertFromDomain(ResendOtpResponse resendOtpResponse);
 
     //VERIFY TOKEN
-    VerifyToken200Response convertFromDomain(FirstStepVerifyTokenResponse response);
+    VerifyToken200Response convertFromDomain(VerifyTokenResponse response);
 
     //GET ACCESSTOKEN BY REFRESH TOKEN
-    SecondStepGetAccessTokenByRefreshTokenRequest convertToDomain(RefreshTokenRequest refreshTokenRequest);
-    RefreshToken200Response convertFromDomain(SecondStepGetAccessTokenByRefreshTokenResponse secondStepGetAccessTokenByRefreshTokenResponse);
+    GetAccessTokenByRefreshTokenRequest convertToDomain(RefreshTokenRequest refreshTokenRequest);
+    RefreshToken200Response convertFromDomain(GetAccessTokenByRefreshTokenResponse getAccessTokenByRefreshTokenResponse);
 
     //LOGOUT
-    Logout200Response convertFromDomain(FourthStepLogoutResponse response);
+    Logout200Response convertFromDomain(LogoutResponse response);
 
 }

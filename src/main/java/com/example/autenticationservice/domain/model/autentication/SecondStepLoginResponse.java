@@ -1,4 +1,4 @@
-package com.example.autenticationservice.domain.model.verifyToken;
+package com.example.autenticationservice.domain.model.autentication;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class FirstStepVerifyTokenResponse {
-    private String username;
+public class SecondStepLoginResponse {
+    private String accessToken;
+    private String refreshToken;
 }

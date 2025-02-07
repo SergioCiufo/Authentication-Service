@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class SecondStepGetAccessTokenByRefreshTokenRequest {
+public class GetAccessTokenByRefreshTokenRequest {
     private String refreshToken;
 }
