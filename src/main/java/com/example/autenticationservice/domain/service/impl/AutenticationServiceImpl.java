@@ -91,7 +91,7 @@ public class AutenticationServiceImpl implements AutenticationService {
     }
 
     @Override
-    public SecondStepLoginResponse secondStepVerifyOtp(SecondStepLoginRequest secondStepLoginRequest) {
+    public SecondStepLoginResponse secondStepLogin(SecondStepLoginRequest secondStepLoginRequest) {
         String otp = secondStepLoginRequest.getOtp();
         String sessionId = secondStepLoginRequest.getSessionId();
         String username = secondStepLoginRequest.getUsername();
@@ -150,7 +150,7 @@ public class AutenticationServiceImpl implements AutenticationService {
     }
 
     @Override
-    public ResendOtpResponse thirdStepResendOtp(ResendOtpRequest resendOtpRequest) {
+    public ResendOtpResponse resendOtp(ResendOtpRequest resendOtpRequest) {
         String sessionId = resendOtpRequest.getSessionId();
         String username = resendOtpRequest.getUsername();
 /*
@@ -186,7 +186,7 @@ public class AutenticationServiceImpl implements AutenticationService {
     }
 
     @Override
-    public VerifyTokenResponse firstStepVerifyToken() {
+    public VerifyTokenResponse verifyToken() {
         //voglio recuperarel 'access token
         String accessToken = jwtService.extractAccessJwt();
 
@@ -213,7 +213,7 @@ public class AutenticationServiceImpl implements AutenticationService {
     }
 
     @Override
-    public GetAccessTokenByRefreshTokenResponse secondStepGetNewAccessToken(GetAccessTokenByRefreshTokenRequest firstStepRequest) {
+    public GetAccessTokenByRefreshTokenResponse getNewAccessToken(GetAccessTokenByRefreshTokenRequest firstStepRequest) {
         String refreshTokenString = jwtService.extractRefreshJwt();
 
         if (refreshTokenString == null || refreshTokenString.isEmpty()) {
@@ -243,7 +243,7 @@ public class AutenticationServiceImpl implements AutenticationService {
     }
 
     @Override
-    public LogoutResponse fourthStepLogout() {
+    public LogoutResponse logout() {
         String refreshTokenString = jwtService.extractRefreshJwt();
 
         if (!(refreshTokenString == null || refreshTokenString.isEmpty())) {

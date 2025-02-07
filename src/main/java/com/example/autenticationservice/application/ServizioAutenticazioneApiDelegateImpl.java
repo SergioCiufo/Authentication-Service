@@ -66,7 +66,7 @@ public class ServizioAutenticazioneApiDelegateImpl implements ServizioAutenticaz
     @Override
     public ResponseEntity<VerifyOTP200Response> verifyOTP(VerifyOTPRequest verifyOTPRequest){
         SecondStepLoginRequest request = autenticationMappers.convertToDomain(verifyOTPRequest);
-        SecondStepLoginResponse response = autenticationService.secondStepVerifyOtp(request);
+        SecondStepLoginResponse response = autenticationService.secondStepLogin(request);
 
         //impostiamo l'accessToken nell'header (bearer token)
         jwtServiceImpl.setAuthorizationHeader(response.getAccessToken());
@@ -79,14 +79,14 @@ public class ServizioAutenticazioneApiDelegateImpl implements ServizioAutenticaz
     @Override
     public ResponseEntity<ReSendOtp200Response> reSendOtp(ReSendOtpRequest reSendOtpRequest){
         ResendOtpRequest request = autenticationMappers.convertToDomain(reSendOtpRequest);
-        ResendOtpResponse response = autenticationService.thirdStepResendOtp(request);
+        ResendOtpResponse response = autenticationService.resendOtp(request);
         ReSendOtp200Response convertedResponse = autenticationMappers.convertFromDomain(response);
         return ResponseEntity.ok(convertedResponse);
     }
 
     @Override
     public ResponseEntity<VerifyToken200Response>  verifyToken(){
-        VerifyTokenResponse response = autenticationService.firstStepVerifyToken();
+        VerifyTokenResponse response = autenticationService.verifyToken();
         VerifyToken200Response convertedResponse = autenticationMappers.convertFromDomain(response);
         return ResponseEntity.ok(convertedResponse);
     }
@@ -94,7 +94,7 @@ public class ServizioAutenticazioneApiDelegateImpl implements ServizioAutenticaz
     @Override
     public ResponseEntity<RefreshToken200Response>  refreshToken(RefreshTokenRequest refreshTokenRequest){
         GetAccessTokenByRefreshTokenRequest request = autenticationMappers.convertToDomain(refreshTokenRequest);
-        GetAccessTokenByRefreshTokenResponse response = autenticationService.secondStepGetNewAccessToken(request);
+        GetAccessTokenByRefreshTokenResponse response = autenticationService.getNewAccessToken(request);
 
         //impostiamo l'accessToken nell'header (bearer token)
         jwtServiceImpl.setAuthorizationHeader(response.getAccessToken());
@@ -105,7 +105,7 @@ public class ServizioAutenticazioneApiDelegateImpl implements ServizioAutenticaz
 
     @Override
     public ResponseEntity<Logout200Response> logout(){
-        LogoutResponse response = autenticationService.fourthStepLogout();
+        LogoutResponse response = autenticationService.logout();
 
         ResponseCookie cleanRefreshCookie = jwtServiceImpl.getCleanJwtCookie();
 

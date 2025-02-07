@@ -11,10 +11,10 @@ public interface AutenticationService {
 
     public StepRegisterResponse register(StepRegisterRequest stepRegisterRequest);
     public FirstStepLoginResponse firstStepLogin(FirstStepLoginRequest request);
-    public SecondStepLoginResponse secondStepVerifyOtp(SecondStepLoginRequest request);
-    public ResendOtpResponse thirdStepResendOtp(ResendOtpRequest request);
-    public VerifyTokenResponse firstStepVerifyToken();
-    public GetAccessTokenByRefreshTokenResponse secondStepGetNewAccessToken(GetAccessTokenByRefreshTokenRequest request);
-    public LogoutResponse fourthStepLogout();
+    public SecondStepLoginResponse secondStepLogin(SecondStepLoginRequest request);
+    public ResendOtpResponse resendOtp(ResendOtpRequest request);
+    public VerifyTokenResponse verifyToken();
+    public GetAccessTokenByRefreshTokenResponse getNewAccessToken(GetAccessTokenByRefreshTokenRequest request);
+    public LogoutResponse logout();
 
 }
