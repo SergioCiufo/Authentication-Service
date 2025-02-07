@@ -35,6 +35,16 @@ public class ServizioAutenticazioneApiDelegateImpl implements ServizioAutenticaz
     private final AutenticationService autenticationService;
     private final JwtServiceImpl jwtServiceImpl;
 
+    // TODO non c'è bisogno che fai First,Second,Third,Fourth le operazioni connesse tra loro sono solo  firstStep e secondStep il resto 
+    // confonde e basta, mi sembra di giocare a tombola a guardare i nomi delle classi
+    // - FirstStepLoginRequest
+    // - SecondStepVerifyOtpRequest
+    // - ThridStepResendOtpRequest(third)
+    // - FirstStepVerifyTokenResponse
+    // - SecondStepGetAccessTokenByRefreshTokenRequest
+    // - FourthStepLogoutResponse
+    // inoltre la notazione first,second si mette con lo stesso nome a seguito per far capire che è uno step successivo della stessa operazione
+    // firstStepLogin, secondStepLogin(firstStep, secondStep servono per dire è il primo/secondo step di LOGIN) se cambi pure l'operazione diventa appunto una tombola
     @Override
     public ResponseEntity<Register200Response> register(RegisterRequest registerRequest){
         StepRegisterRequest request = autenticationMappers.convertToDomain(registerRequest);
@@ -45,6 +55,8 @@ public class ServizioAutenticazioneApiDelegateImpl implements ServizioAutenticaz
 
     @Override
     public ResponseEntity<Login200Response> login(LoginRequest loginRequest){
+        // TODO come crei il sessionId è roba di dominio non di application, il sessionId ti verrà staccato dal domain a richiesta avvenuta con successo
+        // serve a qualcosa averlo creato se poi le credenziali non sono valide?
         String sessionId = UUID.randomUUID().toString(); //si utilizza per creare stringhe randomiche al posto del sessionID
         FirstStepLoginRequest request = autenticationMappers.convertToDomain(loginRequest, sessionId);
 
