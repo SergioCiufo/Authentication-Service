@@ -22,6 +22,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 @Service
 @AllArgsConstructor
@@ -61,13 +62,13 @@ public class AutenticationServiceImpl implements AutenticationService {
     public FirstStepLoginResponse firstStepLogin(FirstStepLoginRequest firstStepLoginRequest) {
         String username = firstStepLoginRequest.getUsername();
         String password = firstStepLoginRequest.getPassword();
-        String sessionId = firstStepLoginRequest.getSessionId(); //UUID
 
         //!servizio db
         //validazione credenziali
 
         User user = userService.validateCredentials(username, password);
 
+        String sessionId = UUID.randomUUID().toString(); //UUID
         //generazione otp
         Otp otp = otpService.generateOtp(user, sessionId);
 

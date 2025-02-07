@@ -1,4 +1,4 @@
-package com.example.autenticationservice.domain.jwt;
+package com.example.autenticationservice.domain.util.jwt;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -11,6 +11,8 @@ import java.security.Key;
 
 // TODO carino, ma è più una utility, sposta in utils e fai un sottopackage jwt
 // ricordami di farti vedere la factory dopo così possiamo farci un fiocchetto su questa cosa
+
+//TODO DONE
 public abstract class TokenManager {
     private final Logger logger = LoggerFactory.getLogger(TokenManager.class);
 

@@ -1,4 +1,4 @@
-package com.example.autenticationservice.domain.service;
+package com.example.autenticationservice.domain.service.impl;
 
 import com.example.autenticationservice.domain.exceptions.InvalidCredentialsException;
 import com.example.autenticationservice.domain.model.User;

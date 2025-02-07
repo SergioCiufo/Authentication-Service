@@ -1,4 +1,4 @@
-package com.example.autenticationservice.domain.service;
+package com.example.autenticationservice.domain.service.impl;
 
 import com.example.autenticationservice.domain.exceptions.InvalidSessionException;
 import com.example.autenticationservice.domain.model.Otp;
@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.List;
 // TODO questa e le classi sotto sono implementazioni non interfacce, mettile in impl(anche se non implementano nessuna interfaccia, nel service teniamo le interfacce in service.impl le implementazioni)
+//TODO DONE
 @Service
 @AllArgsConstructor
 @Log4j2

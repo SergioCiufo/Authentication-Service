@@ -57,8 +57,10 @@ public class ServizioAutenticazioneApiDelegateImpl implements ServizioAutenticaz
     public ResponseEntity<Login200Response> login(LoginRequest loginRequest){
         // TODO come crei il sessionId è roba di dominio non di application, il sessionId ti verrà staccato dal domain a richiesta avvenuta con successo
         // serve a qualcosa averlo creato se poi le credenziali non sono valide?
-        String sessionId = UUID.randomUUID().toString(); //si utilizza per creare stringhe randomiche al posto del sessionID
-        FirstStepLoginRequest request = autenticationMappers.convertToDomain(loginRequest, sessionId);
+        //String sessionId = UUID.randomUUID().toString(); //si utilizza per creare stringhe randomiche al posto del sessionID
+        //FirstStepLoginRequest request = autenticationMappers.convertToDomain(loginRequest, sessionId); //SCOPO DI ESEMPIO
+        //TODO DONE
+        FirstStepLoginRequest request = autenticationMappers.convertToDomain(loginRequest);
 
         FirstStepLoginResponse response = autenticationService.firstStepLogin(request);
 
