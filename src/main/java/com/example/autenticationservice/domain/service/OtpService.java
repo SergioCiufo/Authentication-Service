@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
-
+// TODO questa e le classi sotto sono implementazioni non interfacce, mettile in impl(anche se non implementano nessuna interfaccia, nel service teniamo le interfacce in service.impl le implementazioni)
 @Service
 @AllArgsConstructor
 @Log4j2
