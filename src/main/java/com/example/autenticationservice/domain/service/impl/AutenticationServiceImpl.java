@@ -39,6 +39,7 @@ public class AutenticationServiceImpl implements AutenticationService {
     private final UserService userService;
     private final OtpService otpService;
     private final RefreshTokenService refreshTokenService;
+    private final LoginService loginService;
 
 
     @Override
@@ -65,7 +66,7 @@ public class AutenticationServiceImpl implements AutenticationService {
         String password = firstStepLoginRequest.getPassword();
 
         String sessionId = UUID.randomUUID().toString(); //UUID
-        Otp otp = otpService.validateUserAndGenerateOtp(username, password, sessionId);
+        Otp otp = loginService.validateUserAndGenerateOtp(username, password, sessionId);
 
         //invio opt per email
         emailService.sendEmail(otp.getUser().getEmail(), "Chat4Me - OTP code", otp.getOtp());
@@ -84,25 +85,25 @@ public class AutenticationServiceImpl implements AutenticationService {
         String sessionId = secondStepLoginRequest.getSessionId();
         String username = secondStepLoginRequest.getUsername();
 
-        User user = userService.getUserByUsername(username);
+        User user = userService.getUserByUsername(username); //transazionale
 
         final int MAX_OTP_ATTEMPTS = 2; //parte da 0
 
-        Otp checkOtp = otpService.getOtpBySessionId(sessionId);
+        Otp checkOtp = otpService.getOtpBySessionId(sessionId); //transazionale
 
         Integer otpAttempt = checkOtp.getAttempts();
 
 
         if (otpAttempt >= MAX_OTP_ATTEMPTS) {
             checkOtp.setValid(false);
-            otpService.updateOtp(checkOtp);
+            otpService.updateOtp(checkOtp);  //transazionale
             log.error("OTP entry attempts exhausted");
             throw new ExpireOtpException("OTP entry attempts exhausted");
         }
 
         if (!checkOtp.getOtp().equals(otp)) {
             checkOtp.setAttempts(otpAttempt + 1);
-            otpService.updateOtp(checkOtp);
+            otpService.updateOtp(checkOtp); //transazionale
             throw new InvalidCredentialsException("OTP not valid");
         }
 
@@ -110,7 +111,7 @@ public class AutenticationServiceImpl implements AutenticationService {
 
         if (otpUtil.isOtpExpired(otpExpireTime)) {
             checkOtp.setValid(false);
-            otpService.updateOtp(checkOtp);
+            otpService.updateOtp(checkOtp); //transazionale
             log.error("OTP expired");
             throw new ExpireOtpException("OTP expired");
         }
@@ -122,12 +123,12 @@ public class AutenticationServiceImpl implements AutenticationService {
         log.debug("Access Token: {}", accessToken);
         log.debug("Refresh Token: {}", refreshToken);
 
-        RefreshToken refreshJwt = refreshTokenService.addRefreshToken(refreshToken, user);
+        RefreshToken refreshJwt = refreshTokenService.addRefreshToken(refreshToken, user); //transazionale
         //
         log.debug("Object RefreshToken -> User: {}, Token: {}", refreshJwt.getUser().getUsername(), refreshJwt.getRefreshToken());
 
         checkOtp.setValid(false);
-        otpService.updateOtp(checkOtp);
+        otpService.updateOtp(checkOtp); //transazionale
 
         return SecondStepLoginResponse.builder()
                 .accessToken(accessToken)

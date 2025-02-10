@@ -22,11 +22,6 @@ public class OtpServiceImpl implements OtpServiceApi {
     private final OtpUtil otpUtil;
 
     @Override
-    public void addOtp(Otp otp) {
-        otpRepository.save(otp);
-    }
-
-    @Override
     public void updateOtp(Otp otp) {
         otpRepository.save(otp);
     }
@@ -34,20 +29,6 @@ public class OtpServiceImpl implements OtpServiceApi {
     @Override
     public Optional<Otp> getValidOtpBySessionId(String sessionId) {
         return otpRepository.findOtpBySessionIdAndValidTrue(sessionId);
-    }
-
-    @Override
-    @Transactional
-    public Otp validateUserAndGenerateOtp(String username, String password, String sessionId) {
-        Optional<User> user = userRepository.findByUsernameAndPassword(username, password);
-        if(user.isEmpty()){
-            throw new InvalidCredentialsException("Invalid credentials");
-        }
-
-        Otp otp = otpUtil.generateOtp(user.get(), sessionId);
-
-        otpRepository.save(otp);
-        return otp;
     }
 
     @Override
