@@ -29,15 +29,16 @@ import java.util.UUID;
 @Log4j2
 public class AutenticationServiceImpl implements AutenticationService {
 
-    private final UserService userService;
-    private final RegisterService registerService;
     private final EmailService emailService;
     private final OtpUtil otpUtil;
-    private final OtpService otpService;
     private final RefreshTokenJwt refreshTokenJwt;
     private final AccessTokenJwt accessTokenJwt;
     private final JwtService jwtService;
-    private final TokenService tokenService;
+
+    //prova
+    private final UserService userService;
+    private final OtpService otpService;
+    private final RefreshTokenService refreshTokenService;
 
 
     @Override
@@ -51,7 +52,7 @@ public class AutenticationServiceImpl implements AutenticationService {
                 .otpList(new ArrayList<>())
                 .build();
 
-        registerService.registerUser(newUser);
+        userService.register(newUser);
 
         return StepRegisterResponse.builder()
                 .message("Registration completed")
@@ -63,26 +64,13 @@ public class AutenticationServiceImpl implements AutenticationService {
         String username = firstStepLoginRequest.getUsername();
         String password = firstStepLoginRequest.getPassword();
 
-        //!servizio db
-        //validazione credenziali
-
-        User user = userService.validateCredentials(username, password);
-
         String sessionId = UUID.randomUUID().toString(); //UUID
-        //generazione otp
-        Otp otp = otpService.generateOtp(user, sessionId);
-
-        user.getOtpList().add(otp);
-
-        userService.updateUserOtpList(user);
-
-        otpService.add(otp);
-        //!
+        Otp otp = otpService.validateUserAndGenerateOtp(username, password, sessionId);
 
         //invio opt per email
-        emailService.sendEmail(user.getEmail(), "Chat4Me - OTP code", otp.getOtp());
+        emailService.sendEmail(otp.getUser().getEmail(), "Chat4Me - OTP code", otp.getOtp());
 
-        log.info("OTP generated {} and sent to: {}", otp.getOtp(), user.getEmail());
+        log.info("OTP generated {} and sent to: {}", otp.getOtp(), otp.getUser().getEmail());
 
         return FirstStepLoginResponse.builder()
                 .message("Login successful, OTP sent")
@@ -96,32 +84,33 @@ public class AutenticationServiceImpl implements AutenticationService {
         String sessionId = secondStepLoginRequest.getSessionId();
         String username = secondStepLoginRequest.getUsername();
 
-        //parte logica persistenza
+        User user = userService.getUserByUsername(username);
 
-        final int MAX_OTP_ATTEMPTS = 3;
+        final int MAX_OTP_ATTEMPTS = 2; //parte da 0
 
         Otp checkOtp = otpService.getOtpBySessionId(sessionId);
 
         Integer otpAttempt = checkOtp.getAttempts();
 
-        //otpAttempt preso dal db è null? allora imposta a 0, sennò metti il valore (inutile poiché dovrebbe sempre esserci un valore)
-        otpAttempt = (otpAttempt == null) ? 0 : otpAttempt;
 
         if (otpAttempt >= MAX_OTP_ATTEMPTS) {
-            otpService.setOtpInvalid(checkOtp);
+            checkOtp.setValid(false);
+            otpService.updateOtp(checkOtp);
             log.error("OTP entry attempts exhausted");
             throw new ExpireOtpException("OTP entry attempts exhausted");
         }
 
         if (!checkOtp.getOtp().equals(otp)) {
-            otpService.updateAttempt(checkOtp, otpAttempt + 1);
+            checkOtp.setAttempts(otpAttempt + 1);
+            otpService.updateOtp(checkOtp);
             throw new InvalidCredentialsException("OTP not valid");
         }
 
         long otpExpireTime = checkOtp.getExpiresAt();
 
         if (otpUtil.isOtpExpired(otpExpireTime)) {
-            otpService.setOtpInvalid(checkOtp);
+            checkOtp.setValid(false);
+            otpService.updateOtp(checkOtp);
             log.error("OTP expired");
             throw new ExpireOtpException("OTP expired");
         }
@@ -133,15 +122,12 @@ public class AutenticationServiceImpl implements AutenticationService {
         log.debug("Access Token: {}", accessToken);
         log.debug("Refresh Token: {}", refreshToken);
 
-        User user = userService.getUserFromUsername(username);
-        if (user == null) {
-            log.error("User does not exist");
-        }
-
-        RefreshToken refreshJwt = tokenService.addRefreshToken(refreshToken, user);
+        RefreshToken refreshJwt = refreshTokenService.addRefreshToken(refreshToken, user);
+        //
         log.debug("Object RefreshToken -> User: {}, Token: {}", refreshJwt.getUser().getUsername(), refreshJwt.getRefreshToken());
 
-        otpService.setOtpInvalid(checkOtp);
+        checkOtp.setValid(false);
+        otpService.updateOtp(checkOtp);
 
         return SecondStepLoginResponse.builder()
                 .accessToken(accessToken)
@@ -153,28 +139,24 @@ public class AutenticationServiceImpl implements AutenticationService {
     public ResendOtpResponse resendOtp(ResendOtpRequest resendOtpRequest) {
         String sessionId = resendOtpRequest.getSessionId();
         String username = resendOtpRequest.getUsername();
-/*
-        if (sessionId == null) {
 
-        }
-*/
-        //servzio db
-        //ce lo prendiamo dal db tramite campo idSessione di otp
-        otpService.invalidateOtp(sessionId);
+//        Otp oldOtp = otpService.getOtpBySessionId(sessionId);
+//        oldOtp.setValid(false);
+//        otpService.updateOtp(oldOtp);
+//
+//        User user = userService.getUserByUsername(username);
+//
+//        Otp newOtp = otpUtil.generateOtp(user, sessionId);
+//
+//        otpService.addOtp(newOtp);
+//
+//        String emailReceiver = user.getEmail();
+//        String emailSubject = "Chat4Me - OTP code";
+//        emailService.sendEmail(emailReceiver, emailSubject, newOtp.getOtp());
 
-        //creiamo il nuovo otp
-        User user = userService.getUserFromUsername(username);
+        Otp newOtp = otpService.getNewOtp(sessionId, username);
 
-        if (user == null) {
-            log.warn("User not found for username: {}", username);
-            throw new InvalidSessionException("Invalid or non-existent user");
-        }
-
-        Otp newOtp = otpService.generateOtp(user, sessionId);
-        otpService.add(newOtp);
-        //
-
-        String emailReceiver = user.getEmail();
+        String emailReceiver = newOtp.getUser().getEmail();
         String emailSubject = "Chat4Me - OTP code";
         emailService.sendEmail(emailReceiver, emailSubject, newOtp.getOtp());
 
@@ -221,11 +203,10 @@ public class AutenticationServiceImpl implements AutenticationService {
             throw new MissingTokenException("Missing refresh token, please Login");
         }
 
-        RefreshToken refreshToken = tokenService.getRefreshToken(refreshTokenString);
-
+        RefreshToken refreshToken = refreshTokenService.getRefreshToken(refreshTokenString);
         log.debug("Refresh token: {}", refreshTokenString);
 
-        if (!tokenService.validateRefreshToken(refreshTokenString)) {
+        if (!refreshTokenService.validateRefreshToken(refreshTokenString)) {
                 log.error("Refresh token not valid");
                 throw new MissingTokenException("Missing refresh token, please Login");
         }
@@ -233,7 +214,6 @@ public class AutenticationServiceImpl implements AutenticationService {
         String username = refreshToken.getUser().getUsername();
 
         String accessToken = accessTokenJwt.generateToken(username);
-
         log.info("Access Token: {}", accessToken);
 
         return GetAccessTokenByRefreshTokenResponse.builder()
@@ -247,7 +227,8 @@ public class AutenticationServiceImpl implements AutenticationService {
         String refreshTokenString = jwtService.extractRefreshJwt();
 
         if (!(refreshTokenString == null || refreshTokenString.isEmpty())) {
-            tokenService.invalidateRefreshToken(refreshTokenString);
+            refreshTokenService.invalidateRefreshToken(refreshTokenString);
+
         }
 
         log.debug("Logged out successfully");

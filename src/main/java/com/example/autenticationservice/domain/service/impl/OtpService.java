@@ -1,74 +1,58 @@
 package com.example.autenticationservice.domain.service.impl;
 
+import com.example.autenticationservice.domain.api.OtpServiceApi;
+import com.example.autenticationservice.domain.api.UserServiceApi;
+import com.example.autenticationservice.domain.exceptions.CredentialTakenException;
 import com.example.autenticationservice.domain.exceptions.InvalidSessionException;
 import com.example.autenticationservice.domain.model.Otp;
 import com.example.autenticationservice.domain.model.User;
-import com.example.autenticationservice.domain.util.OtpListUtil;
 import com.example.autenticationservice.domain.util.OtpUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.util.List;
-// TODO questa e le classi sotto sono implementazioni non interfacce, mettile in impl(anche se non implementano nessuna interfaccia, nel service teniamo le interfacce in service.impl le implementazioni)
-//TODO DONE
+import java.util.Optional;
+
 @Service
+//@Transactional //fa sì che ci sia un'unica transazione anche usando più repository // non si dovrebbe usare qui??
 @AllArgsConstructor
 @Log4j2
 public class OtpService {
-    private final OtpListUtil otpListUtil;
+    private final OtpServiceApi otpServiceApi;
+    private final UserServiceApi userServiceApi;
     private final OtpUtil otpUtil;
 
-    public Otp getOtpByUserOtp(String userOtp){
-        List<Otp> otpList = otpListUtil.getOtpList();
-
-        return otpList.stream()
-                .filter(otp -> otp.getOtp().equals(userOtp) && otp.isValid()) //se esiste ed è valido
-                .findFirst() // Prende il primo trovato
-                .orElse(null); //sennò da null
+    public void addOtp(Otp otp) {
+        otpServiceApi.addOtp(otp);
     }
 
-    public Otp generateOtp(User user, String sessionId){
-        String otpGenerated = otpUtil.generateOtp();
-        long creationDate = Instant.now().toEpochMilli();
-        long expirationDate = otpUtil.calculateOtpExpirationTime();
-        int attempts = 0;
-        Otp otp = new Otp(null, user, otpGenerated, sessionId,creationDate, expirationDate, attempts, true);
+    public Otp validateUserAndGenerateOtp(String username, String password, String sessionId) {
+        Optional<User> user = userServiceApi.getUserByUsernameAndPassword(username, password);
+
+        if (user.isEmpty()) {
+            throw new CredentialTakenException("Invalid credentials");
+        }
+
+        Otp otp = otpUtil.generateOtp(user.get(), sessionId);
+
+        otpServiceApi.addOtp(otp);
         return otp;
     }
 
-    public void add(Otp otp) {
-        otpListUtil.getOtpList().add(otp);
-    }
-
     public Otp getOtpBySessionId(String sessionId) {
-        List<Otp> otpList = otpListUtil.getOtpList();
-
-        return otpList.stream()
-                .filter(otp -> otp.getSessionId().equals(sessionId) && otp.isValid())
-                .findFirst()
-                .orElse(null);
-    }
-
-    public void setOtpInvalid(Otp otp) {
-        if (otp != null) {
-            otp.setValid(false);
+        Optional<Otp> otp = otpServiceApi.getValidOtpBySessionId(sessionId);
+        if(otp.isEmpty()) {
+            throw new InvalidSessionException("Invalid session");
         }
+        return otp.get();
     }
 
-    public void updateAttempt(Otp otp, Integer attempt) {
-        if (otp != null) {
-            otp.setAttempts(attempt);
-        }
+    public void updateOtp(Otp otp) {
+        otpServiceApi.updateOtp(otp);
     }
 
-    public void invalidateOtp(String sessionId) {
-        Otp otpToInvalidate = getOtpBySessionId(sessionId);
-        if (otpToInvalidate == null) {
-            throw new InvalidSessionException("Invalid or non-existent session");
-        }
-        log.debug("OTP to cancel: {}", otpToInvalidate.getOtp());
-        setOtpInvalid(otpToInvalidate);
+    public Otp getNewOtp(String sessionId, String username){
+        return otpServiceApi.getNewOtp(sessionId, username);
     }
+
 }

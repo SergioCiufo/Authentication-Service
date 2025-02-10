@@ -2,18 +2,20 @@ package com.example.autenticationservice.domain.util;
 
 import com.example.autenticationservice.domain.model.Otp;
 import com.example.autenticationservice.domain.model.User;
+import com.example.autenticationservice.infrastructure.api.OtpUtil;
 import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;
 import java.time.Instant;
 
 @Component
-public class OtpUtil {
+public class OtpUtilImpl implements OtpUtil {
+
     private final String WORDS = "0123456789";
     private final int OTP_LENGTH = 6;
 
-    //gestisce la scadenza dell'otp
-    //private final long OTP_EXPIRATION = 5 * 60 * 1000; //5 minuti
+//gestisce la scadenza dell'otp
+//private final long OTP_EXPIRATION = 5 * 60 * 1000; //5 minuti
 
     public Otp generateOtp(User user, String sessionId) {
         //random più sicuro usato per generare chiavi

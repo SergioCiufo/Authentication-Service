@@ -1,5 +1,6 @@
 package com.example.autenticationservice.domain.model;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,14 +12,14 @@ import java.time.LocalDateTime;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-//@Entity
-//@Table(name = "Otp"
+@Entity
+@Table(name = "Otp")
 public class Otp {
-    //@Id
-    //@GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    //@ManyToOne
-    //@JoinColumn(name = "user_id", referenceColumnName = "id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "users_id", referencedColumnName = "id", nullable = false)
     private User user;
     private String otp;
     private String sessionId;

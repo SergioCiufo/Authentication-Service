@@ -1,6 +1,15 @@
 spring:
   application:
     name: AutenticationService
+  datasource:
+    url: jdbc:oracle:thin:@localhost:1521:orcl
+    username: C##servAuth
+    password: root
+    driver-class-name: oracle.jdbc.OracleDriver
+  jpa:
+    hibernate:
+      ddl-auto: create
+    database-platform: org.hibernate.dialect.OracleDialect
   mail:
     host: smtp.gmail.com
     port: 587
