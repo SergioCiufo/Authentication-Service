@@ -38,6 +38,20 @@ public class OtpServiceImpl implements OtpServiceApi {
 
     @Override
     @Transactional
+    public Otp validateUserAndGenerateOtp(String username, String password, String sessionId) {
+        Optional<User> user = userRepository.findByUsernameAndPassword(username, password);
+        if(user.isEmpty()){
+            throw new InvalidCredentialsException("Invalid credentials");
+        }
+
+        Otp otp = otpUtil.generateOtp(user.get(), sessionId);
+
+        otpRepository.save(otp);
+        return otp;
+    }
+
+    @Override
+    @Transactional
     public Otp getNewOtp(String sessionId, String username) {
         Optional<Otp> oldOtp = otpRepository.findOtpBySessionId(sessionId);
         if(oldOtp.isEmpty()) {
@@ -52,6 +66,7 @@ public class OtpServiceImpl implements OtpServiceApi {
         }
 
         Otp newOtp = otpUtil.generateOtp(user.get(), sessionId); //risale al domain
+
         otpRepository.save(newOtp);
 
         return newOtp;

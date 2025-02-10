@@ -140,20 +140,6 @@ public class AutenticationServiceImpl implements AutenticationService {
         String sessionId = resendOtpRequest.getSessionId();
         String username = resendOtpRequest.getUsername();
 
-//        Otp oldOtp = otpService.getOtpBySessionId(sessionId);
-//        oldOtp.setValid(false);
-//        otpService.updateOtp(oldOtp);
-//
-//        User user = userService.getUserByUsername(username);
-//
-//        Otp newOtp = otpUtil.generateOtp(user, sessionId);
-//
-//        otpService.addOtp(newOtp);
-//
-//        String emailReceiver = user.getEmail();
-//        String emailSubject = "Chat4Me - OTP code";
-//        emailService.sendEmail(emailReceiver, emailSubject, newOtp.getOtp());
-
         Otp newOtp = otpService.getNewOtp(sessionId, username);
 
         String emailReceiver = newOtp.getUser().getEmail();

@@ -19,24 +19,9 @@ import java.util.Optional;
 @Log4j2
 public class OtpService {
     private final OtpServiceApi otpServiceApi;
-    private final UserServiceApi userServiceApi;
-    private final OtpUtil otpUtil;
-
-    public void addOtp(Otp otp) {
-        otpServiceApi.addOtp(otp);
-    }
 
     public Otp validateUserAndGenerateOtp(String username, String password, String sessionId) {
-        Optional<User> user = userServiceApi.getUserByUsernameAndPassword(username, password);
-
-        if (user.isEmpty()) {
-            throw new CredentialTakenException("Invalid credentials");
-        }
-
-        Otp otp = otpUtil.generateOtp(user.get(), sessionId);
-
-        otpServiceApi.addOtp(otp);
-        return otp;
+        return otpServiceApi.validateUserAndGenerateOtp(username, password, sessionId);
     }
 
     public Otp getOtpBySessionId(String sessionId) {

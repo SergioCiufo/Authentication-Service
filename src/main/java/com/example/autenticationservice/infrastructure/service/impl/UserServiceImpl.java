@@ -1,8 +1,10 @@
 package com.example.autenticationservice.infrastructure.service.impl;
 
 import com.example.autenticationservice.domain.api.UserServiceApi;
+import com.example.autenticationservice.domain.exceptions.CredentialTakenException;
 import com.example.autenticationservice.domain.model.User;
 import com.example.autenticationservice.infrastructure.service.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -19,17 +21,25 @@ public class UserServiceImpl implements UserServiceApi {
     }
 
     @Override
-    public Optional<User> getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
+    @Transactional
+    public void register(User user) {
+        Optional<User> existingUserByUsername = userRepository.findByUsername(user.getUsername());
+        Optional<User> existingUserByEmail = userRepository.findByEmail(user.getEmail());
 
-    @Override
-    public Optional<User> getUserByUsernameAndPassword(String username, String password) {
-        return userRepository.findByUsernameAndPassword(username, password);
-    }
+        if (existingUserByUsername.isPresent() && existingUserByEmail.isPresent()) {
+            throw new CredentialTakenException("Username and email already exists");
+        }
 
-    @Override
-    public void addUser(User user) {
+        if (existingUserByUsername.isPresent()) {
+            throw new CredentialTakenException("Username is already taken");
+        }
+
+        if (existingUserByEmail.isPresent()) {
+            throw new CredentialTakenException("Email is already taken");
+        }
+
         userRepository.save(user);
+
     }
+
 }

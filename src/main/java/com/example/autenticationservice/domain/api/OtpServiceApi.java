@@ -9,5 +9,6 @@ public interface OtpServiceApi {
     void addOtp(Otp otp);
     void updateOtp(Otp otp);
     Optional<Otp> getValidOtpBySessionId(String sessionId);
+    Otp validateUserAndGenerateOtp(String username, String password, String sessionId);
     Otp getNewOtp(String sessionId, String username);
 }
