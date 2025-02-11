@@ -10,11 +10,12 @@ import com.example.autenticationservice.infrastructure.service.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-@Component
+@Repository
 @RequiredArgsConstructor
 public class OtpServiceImpl implements OtpServiceApi {
     private final OtpRepository otpRepository;
@@ -39,7 +40,7 @@ public class OtpServiceImpl implements OtpServiceApi {
             //throw oldOtp Assente
         }
 
-        otpRepository.invalidateOldOtp(oldOtp.get().getOtp());
+        otpRepository.invalidateOtp(oldOtp.get().getOtp());
         Optional<User> user = userRepository.findByUsername(username);
 
         if(user.isEmpty()){

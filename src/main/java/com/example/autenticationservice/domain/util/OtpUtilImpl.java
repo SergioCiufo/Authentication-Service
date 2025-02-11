@@ -13,6 +13,7 @@ public class OtpUtilImpl implements OtpUtil {
 
     private final String WORDS = "0123456789";
     private final int OTP_LENGTH = 6;
+    private final int OTP_ATTEMPTS = 3;
 
 //gestisce la scadenza dell'otp
 //private final long OTP_EXPIRATION = 5 * 60 * 1000; //5 minuti
@@ -41,12 +42,22 @@ public class OtpUtilImpl implements OtpUtil {
                 .build();
     }
 
-    public boolean isOtpExpired(long otpExpireTime) {
+    public long calculateOtpExpirationTime() {
+        return System.currentTimeMillis() + 1 * 60 * 1000; // 1 minuto
+    }
+
+    public boolean isOtpExpired(Otp otp) {
+        long otpExpireTime = otp.getExpiresAt();
         long currentTime = Instant.now().toEpochMilli();
         return (currentTime > otpExpireTime);
     }
 
-    public long calculateOtpExpirationTime() {
-        return System.currentTimeMillis() + 1 * 60 * 1000; // 1 minuto
+    public Otp increaseOtpAttempt(Otp otp) {
+        otp.setAttempts(otp.getAttempts() + 1);
+        return otp;
+    }
+
+    public boolean checkOtpMaxAttempt(Otp otp) {
+        return otp.getAttempts() >= OTP_ATTEMPTS-1; //da parte da 0
     }
 }

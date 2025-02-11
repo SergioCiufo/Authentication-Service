@@ -79,60 +79,85 @@ public class AutenticationServiceImpl implements AutenticationService {
                 .build();
     }
 
+//    @Override
+//    public SecondStepLoginResponse secondStepLogin(SecondStepLoginRequest secondStepLoginRequest) {
+//        String otp = secondStepLoginRequest.getOtp();
+//        String sessionId = secondStepLoginRequest.getSessionId();
+//        String username = secondStepLoginRequest.getUsername();
+//
+//        User user = userService.getUserByUsername(username); //transazionale
+//
+//        final int MAX_OTP_ATTEMPTS = 2; //parte da 0
+//
+//        Otp checkOtp = otpService.getOtpBySessionId(sessionId); //transazionale
+//
+//        Integer otpAttempt = checkOtp.getAttempts();
+//
+//
+//        if (otpAttempt >= MAX_OTP_ATTEMPTS) {
+//            checkOtp.setValid(false);
+//            otpService.updateOtp(checkOtp);  //transazionale
+//            log.error("OTP entry attempts exhausted");
+//            throw new ExpireOtpException("OTP entry attempts exhausted");
+//        }
+//
+//        if (!checkOtp.getOtp().equals(otp)) {
+//            checkOtp.setAttempts(otpAttempt + 1);
+//            otpService.updateOtp(checkOtp); //transazionale
+//            throw new InvalidCredentialsException("OTP not valid");
+//        }
+//
+//        long otpExpireTime = checkOtp.getExpiresAt();
+//
+//        if (otpUtil.isOtpExpired(otpExpireTime)) {
+//            checkOtp.setValid(false);
+//            otpService.updateOtp(checkOtp); //transazionale
+//            log.error("OTP expired");
+//            throw new ExpireOtpException("OTP expired");
+//        }
+//
+//        String refreshToken = refreshTokenJwt.generateToken(username);
+//
+//        String accessToken = accessTokenJwt.generateToken(username);
+//
+//        log.debug("Access Token: {}", accessToken);
+//        log.debug("Refresh Token: {}", refreshToken);
+//
+//        RefreshToken refreshJwt = refreshTokenService.addRefreshToken(refreshToken, user); //transazionale
+//        //
+//        log.debug("Object RefreshToken -> User: {}, Token: {}", refreshJwt.getUser().getUsername(), refreshJwt.getRefreshToken());
+//
+//        checkOtp.setValid(false);
+//        otpService.updateOtp(checkOtp); //transazionale
+//
+//        return SecondStepLoginResponse.builder()
+//                .accessToken(accessToken)
+//                .refreshToken(refreshToken)
+//                .build();
+//    }
+
     @Override
     public SecondStepLoginResponse secondStepLogin(SecondStepLoginRequest secondStepLoginRequest) {
         String otp = secondStepLoginRequest.getOtp();
         String sessionId = secondStepLoginRequest.getSessionId();
         String username = secondStepLoginRequest.getUsername();
 
-        User user = userService.getUserByUsername(username); //transazionale
 
-        final int MAX_OTP_ATTEMPTS = 2; //parte da 0
+        RefreshToken refreshToken = loginService.validateOtpAndGenerateToken(username, sessionId, otp);
 
-        Otp checkOtp = otpService.getOtpBySessionId(sessionId); //transazionale
-
-        Integer otpAttempt = checkOtp.getAttempts();
-
-
-        if (otpAttempt >= MAX_OTP_ATTEMPTS) {
-            checkOtp.setValid(false);
-            otpService.updateOtp(checkOtp);  //transazionale
-            log.error("OTP entry attempts exhausted");
-            throw new ExpireOtpException("OTP entry attempts exhausted");
-        }
-
-        if (!checkOtp.getOtp().equals(otp)) {
-            checkOtp.setAttempts(otpAttempt + 1);
-            otpService.updateOtp(checkOtp); //transazionale
-            throw new InvalidCredentialsException("OTP not valid");
-        }
-
-        long otpExpireTime = checkOtp.getExpiresAt();
-
-        if (otpUtil.isOtpExpired(otpExpireTime)) {
-            checkOtp.setValid(false);
-            otpService.updateOtp(checkOtp); //transazionale
-            log.error("OTP expired");
-            throw new ExpireOtpException("OTP expired");
-        }
-
-        String refreshToken = refreshTokenJwt.generateToken(username);
-
+        //se passa lo step in alto vuol dire che l'username è corretto
         String accessToken = accessTokenJwt.generateToken(username);
 
         log.debug("Access Token: {}", accessToken);
-        log.debug("Refresh Token: {}", refreshToken);
+        log.debug("Refresh Token: {}", refreshToken.getRefreshToken());
 
-        RefreshToken refreshJwt = refreshTokenService.addRefreshToken(refreshToken, user); //transazionale
         //
-        log.debug("Object RefreshToken -> User: {}, Token: {}", refreshJwt.getUser().getUsername(), refreshJwt.getRefreshToken());
+        log.debug("Object RefreshToken -> User: {}, Token: {}", refreshToken.getUser().getUsername(), refreshToken.getRefreshToken());
 
-        checkOtp.setValid(false);
-        otpService.updateOtp(checkOtp); //transazionale
 
         return SecondStepLoginResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
+                .refreshToken(refreshToken.getRefreshToken())
                 .build();
     }
 

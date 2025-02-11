@@ -17,5 +17,6 @@ public interface OtpRepository extends JpaRepository<Otp, Integer> {
 
     @Modifying
     @Query("UPDATE Otp o SET o.valid = false WHERE o.otp = :otp")
-    void invalidateOldOtp(@Param("otp") String otp);
+    void invalidateOtp(@Param("otp") String otp);
+
 }

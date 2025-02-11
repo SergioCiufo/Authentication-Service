@@ -1,6 +1,7 @@
 package com.example.autenticationservice.domain.jwt;
 
 import com.example.autenticationservice.domain.util.jwt.TokenManager;
+import com.example.autenticationservice.infrastructure.api.RefreshTokenJwtInf;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;

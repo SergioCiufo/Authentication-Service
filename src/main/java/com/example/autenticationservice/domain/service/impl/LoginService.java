@@ -2,6 +2,7 @@ package com.example.autenticationservice.domain.service.impl;
 
 import com.example.autenticationservice.domain.api.LoginServiceApi;
 import com.example.autenticationservice.domain.model.Otp;
+import com.example.autenticationservice.domain.model.RefreshToken;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -14,5 +15,9 @@ public class LoginService {
 
     public Otp validateUserAndGenerateOtp(String username, String password, String sessionId) {
         return loginServiceApi.validateUserAndGenerateOtp(username, password, sessionId);
+    }
+
+    public RefreshToken validateOtpAndGenerateToken(String username, String sessionId, String requestOtp){
+        return loginServiceApi.validateOtpAndGenerateToken(username, sessionId, requestOtp);
     }
 }
