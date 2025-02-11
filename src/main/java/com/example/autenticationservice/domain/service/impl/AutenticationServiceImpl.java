@@ -34,8 +34,6 @@ public class AutenticationServiceImpl implements AutenticationService {
     private final RefreshTokenJwt refreshTokenJwt;
     private final AccessTokenJwt accessTokenJwt;
     private final JwtService jwtService;
-
-    //prova
     private final UserService userService;
     private final OtpService otpService;
     private final RefreshTokenService refreshTokenService;
