@@ -1,5 +1,6 @@
-package com.example.autenticationservice.domain.model.entities;
+package com.example.autenticationservice.infrastructure.model;
 
+import com.example.autenticationservice.domain.model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,13 +15,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor //costruttore vuoto
 @Entity
 @Table(name = "RefreshToken")
-public class RefreshToken {
+public class RefreshTokenEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @ManyToOne
     @JoinColumn(name = "users_id", referencedColumnName = "id", nullable = false)
-    private User user;
+    private UserEntity user;
     private String refreshToken;
     private LocalDateTime createdAt;
     private LocalDateTime expireDate;

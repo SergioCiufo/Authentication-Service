@@ -1,7 +1,7 @@
 package com.example.autenticationservice.domain.util;
 
-import com.example.autenticationservice.domain.model.entities.Otp;
-import com.example.autenticationservice.domain.model.entities.User;
+import com.example.autenticationservice.domain.model.Otp;
+import com.example.autenticationservice.domain.model.User;
 import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;

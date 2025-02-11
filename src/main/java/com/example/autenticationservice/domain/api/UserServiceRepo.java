@@ -1,6 +1,6 @@
 package com.example.autenticationservice.domain.api;
 
-import com.example.autenticationservice.domain.model.entities.User;
+import com.example.autenticationservice.domain.model.User;
 
 import java.util.Optional;
 

@@ -2,7 +2,7 @@ package com.example.autenticationservice.domain.service.impl;
 
 import com.example.autenticationservice.domain.api.OtpServiceRepo;
 import com.example.autenticationservice.domain.exceptions.InvalidSessionException;
-import com.example.autenticationservice.domain.model.entities.Otp;
+import com.example.autenticationservice.domain.model.Otp;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;

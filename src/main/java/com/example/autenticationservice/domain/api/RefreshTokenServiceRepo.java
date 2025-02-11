@@ -1,6 +1,6 @@
 package com.example.autenticationservice.domain.api;
 
-import com.example.autenticationservice.domain.model.entities.RefreshToken;
+import com.example.autenticationservice.domain.model.RefreshToken;
 
 import java.util.Optional;
 

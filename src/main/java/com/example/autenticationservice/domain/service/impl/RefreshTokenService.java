@@ -3,16 +3,13 @@ package com.example.autenticationservice.domain.service.impl;
 import com.example.autenticationservice.domain.api.RefreshTokenServiceRepo;
 import com.example.autenticationservice.domain.exceptions.MissingTokenException;
 import com.example.autenticationservice.domain.jwt.RefreshTokenJwt;
-import com.example.autenticationservice.domain.model.entities.RefreshToken;
-import com.example.autenticationservice.domain.model.entities.User;
+import com.example.autenticationservice.domain.model.RefreshToken;
 //import com.example.autenticationservice.domain.util.RefreshTokenListUtil;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service

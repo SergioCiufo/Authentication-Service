@@ -1,5 +1,7 @@
-package com.example.autenticationservice.domain.model.entities;
+package com.example.autenticationservice.infrastructure.model;
 
+import com.example.autenticationservice.domain.model.Otp;
+import com.example.autenticationservice.domain.model.RefreshToken;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +19,7 @@ import java.util.List;
         @UniqueConstraint(columnNames = "username"),
         @UniqueConstraint(columnNames = "email")
 })
-public class User {
+public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -26,7 +28,7 @@ public class User {
     private String email;
     private String password;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Otp> otpList;
+    private List<OtpEntity> otpList;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<RefreshToken> refreshTokenList;
+    private List<RefreshTokenEntity> refreshTokenList;
 }

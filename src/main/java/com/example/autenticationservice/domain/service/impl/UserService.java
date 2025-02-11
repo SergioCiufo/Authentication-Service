@@ -2,7 +2,7 @@ package com.example.autenticationservice.domain.service.impl;
 
 import com.example.autenticationservice.domain.api.UserServiceRepo;
 import com.example.autenticationservice.domain.exceptions.InvalidCredentialsException;
-import com.example.autenticationservice.domain.model.entities.User;
+import com.example.autenticationservice.domain.model.User;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
