@@ -40,11 +40,6 @@ public class OtpUtil {
                 .build();
     }
 
-    public boolean isOtpExpired(long otpExpireTime) {
-        long currentTime = Instant.now().toEpochMilli();
-        return (currentTime > otpExpireTime);
-    }
-
     public long calculateOtpExpirationTime() {
         return System.currentTimeMillis() + 1 * 60 * 1000; // 1 minuto
     }

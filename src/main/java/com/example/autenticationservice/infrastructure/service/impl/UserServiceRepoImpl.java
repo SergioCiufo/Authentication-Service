@@ -23,11 +23,7 @@ public class UserServiceRepoImpl implements UserServiceRepo {
 
     @Override
     public Optional<User> getUserByUsernameAndPassword(String username, String password) {
-        Optional<User> user = userRepository.findByUsernameAndPassword(username, password);
-        if(user.isEmpty()){
-            throw new InvalidCredentialsException("Invalid credentials");
-        }
-        return user;
+        return userRepository.findByUsernameAndPassword(username, password);
     }
 
     @Override
