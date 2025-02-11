@@ -4,7 +4,6 @@ import com.example.autenticationservice.domain.api.RefreshTokenServiceApi;
 import com.example.autenticationservice.domain.model.RefreshToken;
 import com.example.autenticationservice.infrastructure.service.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 

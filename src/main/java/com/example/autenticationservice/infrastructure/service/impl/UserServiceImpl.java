@@ -6,7 +6,6 @@ import com.example.autenticationservice.domain.model.User;
 import com.example.autenticationservice.infrastructure.service.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
