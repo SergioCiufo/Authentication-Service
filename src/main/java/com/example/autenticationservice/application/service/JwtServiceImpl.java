@@ -9,9 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
-// TODO è più una utility che un service vero e proprio, essendo così poco utilizzato e con così poco contributo utilizzerei la notazione
-// @Component, fa la stessa cosa di @Service ma è più generica(perchè non è un vero e proprio servizio, è più una utility utilizzata da un servizio)
-//TODO DONE
 @Component
 @RequiredArgsConstructor
 public class JwtServiceImpl implements JwtService {

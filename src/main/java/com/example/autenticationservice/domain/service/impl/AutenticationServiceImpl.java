@@ -9,9 +9,9 @@ import com.example.autenticationservice.domain.model.autentication.*;
 import com.example.autenticationservice.domain.model.register.StepRegisterResponse;
 import com.example.autenticationservice.domain.model.verifyToken.GetAccessTokenByRefreshTokenRequest;
 import com.example.autenticationservice.domain.model.verifyToken.GetAccessTokenByRefreshTokenResponse;
-import com.example.autenticationservice.domain.model.Otp;
-import com.example.autenticationservice.domain.model.RefreshToken;
-import com.example.autenticationservice.domain.model.User;
+import com.example.autenticationservice.domain.model.entities.Otp;
+import com.example.autenticationservice.domain.model.entities.RefreshToken;
+import com.example.autenticationservice.domain.model.entities.User;
 import com.example.autenticationservice.domain.model.register.StepRegisterRequest;
 import com.example.autenticationservice.domain.model.verifyToken.VerifyTokenResponse;
 import com.example.autenticationservice.domain.service.*;
@@ -20,6 +20,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -38,7 +39,7 @@ public class AutenticationServiceImpl implements AutenticationService {
     private final UserService userService;
     private final OtpService otpService;
     private final RefreshTokenService refreshTokenService;
-    private final LoginService loginService;
+    private final OtpUtil otpUtil;
 
 
     @Override
@@ -60,17 +61,22 @@ public class AutenticationServiceImpl implements AutenticationService {
     }
 
     @Override
+    @Transactional
     public FirstStepLoginResponse firstStepLogin(FirstStepLoginRequest firstStepLoginRequest) {
         String username = firstStepLoginRequest.getUsername();
         String password = firstStepLoginRequest.getPassword();
 
         String sessionId = UUID.randomUUID().toString(); //UUID
-        Otp otp = loginService.validateUserAndGenerateOtp(username, password, sessionId);
 
-        //invio opt per email
-        emailService.sendEmail(otp.getUser().getEmail(), "Chat4Me - OTP code", otp.getOtp());
+        User user = userService.getUserByUsernameAndPassword(username, password);
 
-        log.info("OTP generated {} and sent to: {}", otp.getOtp(), otp.getUser().getEmail());
+        Otp otp = otpUtil.generateOtp(user, sessionId);
+
+        otpService.saveOtp(otp);
+
+        emailService.sendEmail(user.getEmail(), "Chat4Me - OTP code", otp.getOtp());
+
+        log.info("OTP generated {} and sent to: {}", otp.getOtp(), user.getEmail());
 
         return FirstStepLoginResponse.builder()
                 .message("Login successful, OTP sent")
@@ -78,80 +84,45 @@ public class AutenticationServiceImpl implements AutenticationService {
                 .build();
     }
 
-//    @Override
-//    public SecondStepLoginResponse secondStepLogin(SecondStepLoginRequest secondStepLoginRequest) {
-//        String otp = secondStepLoginRequest.getOtp();
-//        String sessionId = secondStepLoginRequest.getSessionId();
-//        String username = secondStepLoginRequest.getUsername();
-//
-//        User user = userService.getUserByUsername(username); //transazionale
-//
-//        final int MAX_OTP_ATTEMPTS = 2; //parte da 0
-//
-//        Otp checkOtp = otpService.getOtpBySessionId(sessionId); //transazionale
-//
-//        Integer otpAttempt = checkOtp.getAttempts();
-//
-//
-//        if (otpAttempt >= MAX_OTP_ATTEMPTS) {
-//            checkOtp.setValid(false);
-//            otpService.updateOtp(checkOtp);  //transazionale
-//            log.error("OTP entry attempts exhausted");
-//            throw new ExpireOtpException("OTP entry attempts exhausted");
-//        }
-//
-//        if (!checkOtp.getOtp().equals(otp)) {
-//            checkOtp.setAttempts(otpAttempt + 1);
-//            otpService.updateOtp(checkOtp); //transazionale
-//            throw new InvalidCredentialsException("OTP not valid");
-//        }
-//
-//        long otpExpireTime = checkOtp.getExpiresAt();
-//
-//        if (otpUtil.isOtpExpired(otpExpireTime)) {
-//            checkOtp.setValid(false);
-//            otpService.updateOtp(checkOtp); //transazionale
-//            log.error("OTP expired");
-//            throw new ExpireOtpException("OTP expired");
-//        }
-//
-//        String refreshToken = refreshTokenJwt.generateToken(username);
-//
-//        String accessToken = accessTokenJwt.generateToken(username);
-//
-//        log.debug("Access Token: {}", accessToken);
-//        log.debug("Refresh Token: {}", refreshToken);
-//
-//        RefreshToken refreshJwt = refreshTokenService.addRefreshToken(refreshToken, user); //transazionale
-//        //
-//        log.debug("Object RefreshToken -> User: {}, Token: {}", refreshJwt.getUser().getUsername(), refreshJwt.getRefreshToken());
-//
-//        checkOtp.setValid(false);
-//        otpService.updateOtp(checkOtp); //transazionale
-//
-//        return SecondStepLoginResponse.builder()
-//                .accessToken(accessToken)
-//                .refreshToken(refreshToken)
-//                .build();
-//    }
-
     @Override
+    @Transactional
     public SecondStepLoginResponse secondStepLogin(SecondStepLoginRequest secondStepLoginRequest) {
-        String otp = secondStepLoginRequest.getOtp();
+        String requestOtp = secondStepLoginRequest.getOtp();
         String sessionId = secondStepLoginRequest.getSessionId();
         String username = secondStepLoginRequest.getUsername();
 
+        User user = userService.getUserByUsername(username);
 
-        RefreshToken refreshToken = loginService.validateOtpAndGenerateToken(username, sessionId, otp);
+        Otp dbOtp = otpService.getOtpBySessionId(sessionId);
 
-        //se passa lo step in alto vuol dire che l'username è corretto
+        //controlli validità Otp
+        if(otpUtil.checkOtpMaxAttempt(dbOtp)){
+            otpService.invalidateOtp(dbOtp);
+            throw new ExpireOtpException("OTP entry attemps exhausted");
+        }
+
+        if(!requestOtp.equals(dbOtp.getOtp())){
+            otpUtil.increaseOtpAttempt(dbOtp);
+            otpService.updateOtp(dbOtp);
+            throw new InvalidCredentialsException("OTP not valid");
+        }
+
+        if(otpUtil.isOtpExpired(dbOtp)){
+            otpService.invalidateOtp(dbOtp);
+            throw new ExpireOtpException("OTP expired");
+        }
+        //
+
+        String refreshTokenString = refreshTokenJwt.generateToken(user.getUsername());
+        RefreshToken refreshToken = refreshTokenService.getRefreshToken(refreshTokenString);
+
         String accessToken = accessTokenJwt.generateToken(username);
 
         log.debug("Access Token: {}", accessToken);
         log.debug("Refresh Token: {}", refreshToken.getRefreshToken());
 
         //
-        log.debug("Object RefreshToken -> User: {}, Token: {}", refreshToken.getUser().getUsername(), refreshToken.getRefreshToken());
+        log.debug("Object RefreshToken -> User: {}, Token: {}", user.getUsername(), refreshToken.getRefreshToken());
 
 
         return SecondStepLoginResponse.builder()
@@ -161,11 +132,17 @@ public class AutenticationServiceImpl implements AutenticationService {
     }
 
     @Override
+    @Transactional
     public ResendOtpResponse resendOtp(ResendOtpRequest resendOtpRequest) {
         String sessionId = resendOtpRequest.getSessionId();
         String username = resendOtpRequest.getUsername();
 
-        Otp newOtp = otpService.getNewOtp(sessionId, username);
+        User user = userService.getUserByUsername(username);
+        Otp oldOtp = otpService.getOtpBySessionId(sessionId);
+        otpService.invalidateOtp(oldOtp);
+
+        Otp newOtp = otpUtil.generateOtp(user, sessionId);
+        otpService.saveOtp(newOtp);
 
         String emailReceiver = newOtp.getUser().getEmail();
         String emailSubject = "Chat4Me - OTP code";

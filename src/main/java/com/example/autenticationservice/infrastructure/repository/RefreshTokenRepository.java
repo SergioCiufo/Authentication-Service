@@ -1,6 +1,6 @@
-package com.example.autenticationservice.infrastructure.service;
+package com.example.autenticationservice.infrastructure.repository;
 
-import com.example.autenticationservice.domain.model.RefreshToken;
+import com.example.autenticationservice.domain.model.entities.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

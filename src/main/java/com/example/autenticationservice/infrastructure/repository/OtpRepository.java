@@ -1,6 +1,6 @@
-package com.example.autenticationservice.infrastructure.service;
+package com.example.autenticationservice.infrastructure.repository;
 
-import com.example.autenticationservice.domain.model.Otp;
+import com.example.autenticationservice.domain.model.entities.Otp;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -11,8 +11,6 @@ import java.util.Optional;
 
 @Repository
 public interface OtpRepository extends JpaRepository<Otp, Integer> {
-    Optional<Otp> findOtpBySessionId(String sessionId);
-
     Optional<Otp> findOtpBySessionIdAndValidTrue(String sessionId);
 
     @Modifying

@@ -1,4 +1,4 @@
-package com.example.autenticationservice.domain.model;
+package com.example.autenticationservice.domain.model.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

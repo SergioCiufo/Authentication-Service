@@ -1,17 +1,16 @@
 package com.example.autenticationservice.infrastructure.service.impl;
 
-import com.example.autenticationservice.domain.api.RefreshTokenServiceApi;
-import com.example.autenticationservice.domain.model.RefreshToken;
-import com.example.autenticationservice.infrastructure.service.RefreshTokenRepository;
+import com.example.autenticationservice.domain.api.RefreshTokenServiceRepo;
+import com.example.autenticationservice.domain.model.entities.RefreshToken;
+import com.example.autenticationservice.infrastructure.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class RefreshTokenServiceImpl implements RefreshTokenServiceApi {
+public class RefreshTokenServiceImpl implements RefreshTokenServiceRepo {
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
@@ -25,7 +24,6 @@ public class RefreshTokenServiceImpl implements RefreshTokenServiceApi {
     }
 
     @Override
-    @Transactional //svolge tutto in una transazione
     public void invalidateRefreshToken(String refreshTokenString) {
         refreshTokenRepository.invalidateRefreshToken(refreshTokenString);
     }
