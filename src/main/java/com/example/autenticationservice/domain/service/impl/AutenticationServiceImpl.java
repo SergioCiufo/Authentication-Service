@@ -109,10 +109,12 @@ public class AutenticationServiceImpl implements AutenticationService {
             otpService.invalidateOtp(dbOtp);
             throw new ExpireOtpException("OTP expired");
         }
-        //
 
-        String refreshTokenString = refreshTokenJwt.generateToken(user.getUsername());
-        RefreshToken refreshToken = refreshTokenService.getRefreshToken(refreshTokenString);
+        //se tutto va bene l'otp è verificato, lo invalidiamo e andiamo avanti con la generazione del token
+        otpService.invalidateOtp(dbOtp);
+
+        RefreshToken refreshToken = refreshTokenService.generateRefreshToken(user);
+        refreshTokenService.addRefreshToken(refreshToken);
 
         String accessToken = accessTokenJwt.generateToken(username);
 
@@ -121,7 +123,6 @@ public class AutenticationServiceImpl implements AutenticationService {
 
         //
         log.debug("Object RefreshToken -> User: {}, Token: {}", user.getUsername(), refreshToken.getRefreshToken());
-
 
         return SecondStepLoginResponse.builder()
                 .accessToken(accessToken)
