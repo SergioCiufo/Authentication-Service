@@ -5,10 +5,11 @@ import com.example.autenticationservice.domain.model.RefreshToken;
 import com.example.autenticationservice.infrastructure.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-@Repository
+@Service
 @RequiredArgsConstructor
 public class RefreshTokenServiceImpl implements RefreshTokenServiceRepo {
     private final RefreshTokenRepository refreshTokenRepository;

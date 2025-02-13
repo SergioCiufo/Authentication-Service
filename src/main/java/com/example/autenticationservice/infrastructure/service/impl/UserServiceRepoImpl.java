@@ -2,16 +2,15 @@ package com.example.autenticationservice.infrastructure.service.impl;
 
 import com.example.autenticationservice.domain.api.UserServiceRepo;
 import com.example.autenticationservice.domain.exceptions.CredentialTakenException;
-import com.example.autenticationservice.domain.exceptions.InvalidCredentialsException;
 import com.example.autenticationservice.domain.model.User;
 import com.example.autenticationservice.infrastructure.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-@Repository
+@Service
 @RequiredArgsConstructor
 public class UserServiceRepoImpl implements UserServiceRepo {
     private final UserRepository userRepository;
