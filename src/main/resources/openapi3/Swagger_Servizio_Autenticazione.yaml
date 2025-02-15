@@ -10,7 +10,7 @@ info:
 tags:
   - name: Servizio Autenticazione
     description: Registrazione, login con OTP e gestione dei token di autenticazione
-    
+
 components:
   securitySchemes:
     bearerAuth:
@@ -22,7 +22,7 @@ components:
       bearerFormat: JWT  # Facoltativo, specifica che si tratta di un JWT    
 
 paths:
- 
+
   /register:
     post:
       tags:
@@ -164,7 +164,7 @@ paths:
                     type: string
         '401':
           description: Accesso non autorizzato (Token errato/scaduto o non valido)
-          
+
   /token/refresh:
     post:
       tags:
@@ -198,7 +198,7 @@ paths:
                     example: "Nuovo access token generato con successo"
         '401':
           description: Accesso non autorizzato, token mancante o non valido
-          
+
   /logout:
     post:
       tags:
@@ -221,7 +221,7 @@ paths:
                     example: "Logout eseguito con successo. Token invalidato."
         '401':
           description: Accesso non autorizzato, nessun token fornito o token non valido
-  
+
   #due scadenze, una per l'otp inviato ed una per il sessionOtp che ovviamente sarà più lungo, così possiamo richiedere nuovi otp
   #questo fa sì che possiamo anche mettere un counter di volte in cui è stata richiesto il reSend e mettere un limite per evitare attacchi
   /otp/reSend:
@@ -257,3 +257,28 @@ paths:
                     example: "OTP inviato con successo tramite mail o console"
         '401':
           description: Accesso non autorizzato (OTP o sessionOTP errato/scaduto o non valido)
+
+  /username-list:
+    get:
+      tags:
+        - Servizio Autenticazione
+      summary: Restituisce tutti gli username della lista utenti
+      description: Restituisce tutti gli username della lista utenti per darla al servizio di cui ne ha bisogno così a livello di database si ha una solo tabella utenti
+      operationId: getUsernameList
+      responses:
+        '200':
+          description: Operazione completata
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    username:
+                      type: string
+                      example: "shinji"
+        '204':
+          description: Lista vuota, non ci sono utenti #return lista vuota
+        '401':
+          description: Accesso non autorizzato

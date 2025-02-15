@@ -5,6 +5,7 @@ import com.example.autenticationservice.domain.api.JwtService;
 import com.example.autenticationservice.domain.exceptions.*;
 import com.example.autenticationservice.domain.jwt.AccessTokenJwt;
 import com.example.autenticationservice.domain.jwt.RefreshTokenJwt;
+import com.example.autenticationservice.domain.model.GetUsernameResponse;
 import com.example.autenticationservice.domain.model.autentication.*;
 import com.example.autenticationservice.domain.model.register.StepRegisterResponse;
 import com.example.autenticationservice.domain.model.verifyToken.GetAccessTokenByRefreshTokenRequest;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -42,7 +44,6 @@ public class AutenticationServiceImpl implements AutenticationService {
 
     @Override
     public StepRegisterResponse register(StepRegisterRequest stepRegisterRequest) {
-
         User newUser = User.builder()
                 .name(stepRegisterRequest.getName())
                 .username(stepRegisterRequest.getUsername())
@@ -222,5 +223,18 @@ public class AutenticationServiceImpl implements AutenticationService {
         return LogoutResponse.builder()
                 .message("Logout successful. Tokens invalidated.")
                 .build();
+    }
+
+    @Override
+    public List<GetUsernameResponse> getUsername() {
+        List<User> usernameList = userService.getUserList();
+        //prende l'oggetto user e ne ricava solo l'username e l'idUtente
+        List<GetUsernameResponse> responseList = usernameList.stream()
+                .map(user -> GetUsernameResponse.builder()
+                        .username(user.getUsername())
+                        .build())
+                .toList();
+
+        return responseList;
     }
 }

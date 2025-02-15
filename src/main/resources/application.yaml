@@ -8,7 +8,7 @@ spring:
     driver-class-name: oracle.jdbc.OracleDriver
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     database-platform: org.hibernate.dialect.OracleDialect
   mail:
     host: smtp.gmail.com
@@ -27,5 +27,5 @@ spring:
     jwtAccessCookieName: jwtAccessCookie
     jwtRefreshCookieName: jwtRefreshCookie
     jwtSecret: PeroquantoatequellochepuifarechetupertequalcosadapoterfaredovrebbeesserciNonticostringeranessunoPensadatestodecididatestochecosaadessotutestessodebbafare
-    jwtAccessExpirations: 60000
+    jwtAccessExpirations: 6000000
     jwtRefreshExpirations: 604800000

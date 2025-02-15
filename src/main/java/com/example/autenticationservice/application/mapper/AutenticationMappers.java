@@ -1,5 +1,6 @@
 package com.example.autenticationservice.application.mapper;
 
+import com.example.autenticationservice.domain.model.GetUsernameResponse;
 import com.example.autenticationservice.domain.model.autentication.*;
 import com.example.autenticationservice.domain.model.register.StepRegisterResponse;
 import com.example.autenticationservice.domain.model.verifyToken.GetAccessTokenByRefreshTokenRequest;
@@ -40,5 +41,8 @@ public interface AutenticationMappers {
 
     //LOGOUT
     Logout200Response convertFromDomain(LogoutResponse response);
+
+    //GET USERNAME LIST
+    GetUsernameList200ResponseInner convertFromDomain(GetUsernameResponse response);
 
 }

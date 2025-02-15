@@ -2,6 +2,7 @@ package com.example.autenticationservice.application;
 
 import com.example.autenticationservice.application.mapper.*;
 import com.example.autenticationservice.application.service.JwtServiceImpl;
+import com.example.autenticationservice.domain.model.GetUsernameResponse;
 import com.example.autenticationservice.domain.model.autentication.*;
 import com.example.autenticationservice.domain.model.register.StepRegisterRequest;
 import com.example.autenticationservice.domain.model.register.StepRegisterResponse;
@@ -19,6 +20,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RequiredArgsConstructor //creami costruttore con parametri richiesti (final) @Service
 @RestController
@@ -97,5 +100,14 @@ public class ServizioAutenticazioneApiDelegateImpl implements ServizioAutenticaz
                 .header(HttpHeaders.SET_COOKIE, cleanRefreshCookie.toString())
                 .header(HttpHeaders.AUTHORIZATION, "")
                 .body(convertedResponse);
+    }
+
+    @Override
+    public ResponseEntity<List<GetUsernameList200ResponseInner>> getUsernameList(){
+        List<GetUsernameResponse> response = autenticationService.getUsername();
+        List<GetUsernameList200ResponseInner> username = response.stream()
+                .map(autenticationMappers::convertFromDomain)
+                .toList();
+        return ResponseEntity.ok(username);
     }
 }

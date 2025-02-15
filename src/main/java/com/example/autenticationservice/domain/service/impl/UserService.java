@@ -6,6 +6,7 @@ import com.example.autenticationservice.domain.model.User;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -32,5 +33,9 @@ public class UserService {
             throw new InvalidCredentialsException("Invalid credentials");
         }
         return user.get();
+    }
+
+    public List<User> getUserList(){
+        return userServiceRepo.getUserList();
     }
 }
