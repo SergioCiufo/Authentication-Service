@@ -16,6 +16,7 @@ import com.example.autenticationservice.domain.model.User;
 import com.example.autenticationservice.domain.model.register.StepRegisterRequest;
 import com.example.autenticationservice.domain.model.verifyToken.VerifyTokenResponse;
 import com.example.autenticationservice.domain.service.*;
+import com.example.autenticationservice.domain.util.HashUtil;
 import com.example.autenticationservice.domain.util.OtpUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.AllArgsConstructor;
@@ -40,15 +41,17 @@ public class AutenticationServiceImpl implements AutenticationService {
     private final OtpService otpService;
     private final RefreshTokenService refreshTokenService;
     private final OtpUtil otpUtil;
+    private final HashUtil hashUtil;
 
 
     @Override
     public StepRegisterResponse register(StepRegisterRequest stepRegisterRequest) {
+        String passwordSha1 = hashUtil.sha1Password(stepRegisterRequest.getPassword());
         User newUser = User.builder()
                 .name(stepRegisterRequest.getName())
                 .username(stepRegisterRequest.getUsername())
                 .email(stepRegisterRequest.getEmail())
-                .password(stepRegisterRequest.getPassword())
+                .password(passwordSha1)
                 .otpList(new ArrayList<>())
                 .build();
 
@@ -63,11 +66,12 @@ public class AutenticationServiceImpl implements AutenticationService {
     @Transactional
     public FirstStepLoginResponse firstStepLogin(FirstStepLoginRequest firstStepLoginRequest) {
         String username = firstStepLoginRequest.getUsername();
-        String password = firstStepLoginRequest.getPassword();
+        //String password = firstStepLoginRequest.getPassword();
+        String passwordSha1 = hashUtil.sha1Password(firstStepLoginRequest.getPassword());
 
         String sessionId = UUID.randomUUID().toString(); //UUID
 
-        User user = userService.getUserByUsernameAndPassword(username, password);
+        User user = userService.getUserByUsernameAndPassword(username, passwordSha1);
 
         Otp otp = otpUtil.generateOtp(user, sessionId);
 
