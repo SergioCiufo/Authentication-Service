@@ -1,4 +1,4 @@
-package com.example.autenticationservice.domain.api;
+package com.example.autenticationservice.domain.repository;
 
 import com.example.autenticationservice.domain.model.Otp;
 

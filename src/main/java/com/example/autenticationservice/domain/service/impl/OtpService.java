@@ -1,6 +1,6 @@
 package com.example.autenticationservice.domain.service.impl;
 
-import com.example.autenticationservice.domain.api.OtpServiceRepo;
+import com.example.autenticationservice.domain.repository.OtpServiceRepo;
 import com.example.autenticationservice.domain.exceptions.InvalidSessionException;
 import com.example.autenticationservice.domain.model.Otp;
 import lombok.AllArgsConstructor;
@@ -16,11 +16,8 @@ public class OtpService {
     private final OtpServiceRepo otpServiceRepo;
 
     public Otp getOtpBySessionId(String sessionId) {
-        Optional<Otp> otp = otpServiceRepo.getValidOtpBySessionId(sessionId);
-        if(otp.isEmpty()) {
-            throw new InvalidSessionException("Invalid session");
-        }
-        return otp.get();
+        return otpServiceRepo.getValidOtpBySessionId(sessionId)
+                .orElseThrow(() -> new InvalidSessionException("Invalid Session Id"));
     }
 
     public void saveOtp(Otp otp) { otpServiceRepo.saveOtp(otp);}

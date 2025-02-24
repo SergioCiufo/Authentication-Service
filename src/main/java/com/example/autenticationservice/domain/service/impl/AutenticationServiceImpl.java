@@ -3,8 +3,8 @@ package com.example.autenticationservice.domain.service.impl;
 import com.example.autenticationservice.domain.api.EmailService;
 import com.example.autenticationservice.domain.api.JwtService;
 import com.example.autenticationservice.domain.exceptions.*;
-import com.example.autenticationservice.domain.jwt.AccessTokenJwt;
-import com.example.autenticationservice.domain.jwt.RefreshTokenJwt;
+import com.example.autenticationservice.domain.util.jwt.AccessTokenJwt;
+import com.example.autenticationservice.domain.util.jwt.RefreshTokenJwt;
 import com.example.autenticationservice.domain.model.GetUsernameResponse;
 import com.example.autenticationservice.domain.model.autentication.*;
 import com.example.autenticationservice.domain.model.register.StepRegisterResponse;
@@ -19,6 +19,7 @@ import com.example.autenticationservice.domain.service.*;
 import com.example.autenticationservice.domain.util.HashUtil;
 import com.example.autenticationservice.domain.util.OtpUtil;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.micrometer.common.util.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -34,19 +35,20 @@ import java.util.UUID;
 public class AutenticationServiceImpl implements AutenticationService {
 
     private final EmailService emailService;
-    private final RefreshTokenJwt refreshTokenJwt;
-    private final AccessTokenJwt accessTokenJwt;
+//    private final RefreshTokenJwt refreshTokenJwt;
+//    private final AccessTokenJwt accessTokenJwt;
     private final JwtService jwtService;
     private final UserService userService;
     private final OtpService otpService;
-    private final RefreshTokenService refreshTokenService;
+//    private final RefreshTokenService refreshTokenService;
+    private final TokenService tokenService;
     private final OtpUtil otpUtil;
     private final HashUtil hashUtil;
 
 
     @Override
     public StepRegisterResponse register(StepRegisterRequest stepRegisterRequest) {
-        String passwordSha1 = hashUtil.sha1Password(stepRegisterRequest.getPassword());
+        String passwordSha1 = hashUtil.stringToSha1(stepRegisterRequest.getPassword());
         User newUser = User.builder()
                 .name(stepRegisterRequest.getName())
                 .username(stepRegisterRequest.getUsername())
@@ -67,7 +69,7 @@ public class AutenticationServiceImpl implements AutenticationService {
     public FirstStepLoginResponse firstStepLogin(FirstStepLoginRequest firstStepLoginRequest) {
         String username = firstStepLoginRequest.getUsername();
         //String password = firstStepLoginRequest.getPassword();
-        String passwordSha1 = hashUtil.sha1Password(firstStepLoginRequest.getPassword());
+        String passwordSha1 = hashUtil.stringToSha1(firstStepLoginRequest.getPassword());
 
         String sessionId = UUID.randomUUID().toString(); //UUID
 
@@ -118,10 +120,10 @@ public class AutenticationServiceImpl implements AutenticationService {
         //se tutto va bene l'otp è verificato, lo invalidiamo e andiamo avanti con la generazione del token
         otpService.invalidateOtp(dbOtp);
 
-        RefreshToken refreshToken = refreshTokenService.generateRefreshToken(user);
-        refreshTokenService.addRefreshToken(refreshToken);
+        RefreshToken refreshToken = tokenService.generateRefreshToken(user);
+        tokenService.addRefreshToken(refreshToken);
 
-        String accessToken = accessTokenJwt.generateToken(username);
+        String accessToken = tokenService.generateAccessToken(username);
 
         log.debug("Access Token: {}", accessToken);
         log.debug("Refresh Token: {}", refreshToken.getRefreshToken());
@@ -164,7 +166,8 @@ public class AutenticationServiceImpl implements AutenticationService {
         //voglio recuperarel 'access token
         String accessToken = jwtService.extractAccessJwt();
 
-        if (accessToken == null || accessToken.isEmpty()) {
+//        if (accessToken == null || accessToken.isEmpty()) { isBlank sostituisce questo
+        if(StringUtils.isBlank(accessToken)){
             log.error("Missing Access token");
             throw new MissingTokenException("Missing or non-existent token");
         }
@@ -172,13 +175,14 @@ public class AutenticationServiceImpl implements AutenticationService {
         log.debug("Access token: {}", accessToken);
 
         try {
-            refreshTokenJwt.validateToken(accessToken);
+//            refreshTokenJwt.validateToken(accessToken);
+            tokenService.validateRefreshToken(accessToken);
         } catch (ExpiredJwtException e) {
             log.error("Access token expired, attempting to obtain a new one via refresh token");
             throw new TokenExpiredException("Access token expired, attempting to obtain a new one via refresh token");
         }
 
-        String username = accessTokenJwt.getUsernameFromToken(accessToken);
+        String username = tokenService.getUsernameFromToken(accessToken);
         log.debug("Username from accessToken: {}", username);
 
         return VerifyTokenResponse.builder()
@@ -190,22 +194,22 @@ public class AutenticationServiceImpl implements AutenticationService {
     public GetAccessTokenByRefreshTokenResponse getNewAccessToken(GetAccessTokenByRefreshTokenRequest firstStepRequest) {
         String refreshTokenString = jwtService.extractRefreshJwt();
 
-        if (refreshTokenString == null || refreshTokenString.isEmpty()) {
+        if(StringUtils.isBlank(refreshTokenString)){
             log.error("Missing Refresh token");
             throw new MissingTokenException("Missing refresh token, please Login");
         }
 
-        RefreshToken refreshToken = refreshTokenService.getRefreshToken(refreshTokenString);
+        RefreshToken refreshToken = tokenService.getRefreshToken(refreshTokenString);
         log.debug("Refresh token: {}", refreshTokenString);
 
-        if (!refreshTokenService.validateRefreshToken(refreshTokenString)) {
+        if (!tokenService.validateRefreshToken(refreshTokenString)) {
                 log.error("Refresh token not valid");
                 throw new MissingTokenException("Missing refresh token, please Login");
         }
 
         String username = refreshToken.getUser().getUsername();
 
-        String accessToken = accessTokenJwt.generateToken(username);
+        String accessToken = tokenService.generateAccessToken(username);
         log.info("Access Token: {}", accessToken);
 
         return GetAccessTokenByRefreshTokenResponse.builder()
@@ -218,9 +222,9 @@ public class AutenticationServiceImpl implements AutenticationService {
     public LogoutResponse logout() {
         String refreshTokenString = jwtService.extractRefreshJwt();
 
-        if (!(refreshTokenString == null || refreshTokenString.isEmpty())) {
-            refreshTokenService.invalidateRefreshToken(refreshTokenString);
-
+//        if (!(refreshTokenString == null || refreshTokenString.isEmpty())) {
+        if(!StringUtils.isBlank(refreshTokenString)){
+            tokenService.invalidateRefreshToken(refreshTokenString);
         }
 
         log.debug("Logged out successfully");

@@ -1,10 +1,9 @@
 package com.example.autenticationservice.infrastructure.service.impl;
 
-import com.example.autenticationservice.domain.api.RefreshTokenServiceRepo;
+import com.example.autenticationservice.domain.repository.RefreshTokenServiceRepo;
 import com.example.autenticationservice.domain.model.RefreshToken;
 import com.example.autenticationservice.infrastructure.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;

@@ -1,6 +1,6 @@
 package com.example.autenticationservice.infrastructure.service.impl;
 
-import com.example.autenticationservice.domain.api.UserServiceRepo;
+import com.example.autenticationservice.domain.repository.UserServiceRepo;
 import com.example.autenticationservice.domain.exceptions.CredentialTakenException;
 import com.example.autenticationservice.domain.model.User;
 import com.example.autenticationservice.infrastructure.repository.UserRepository;

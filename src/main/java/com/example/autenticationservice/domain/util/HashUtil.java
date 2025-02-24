@@ -9,7 +9,7 @@ import java.util.Base64;
 @Component
 public class HashUtil {
     //SHA-1 è un algoritmo che prende una stringa e la trasforma in una sequenza di byte (hash)
-    public String sha1Password(String password) {
+    public String stringToSha1(String password) {
         try{
             MessageDigest messageDigest = MessageDigest.getInstance("SHA-1"); //classe per calcolare l'hash e getIstance scegliamo che tipo di hash usare
             byte[] hashBytes = messageDigest.digest(password.getBytes()); //conversione in un array di byte

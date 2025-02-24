@@ -1,6 +1,6 @@
 package com.example.autenticationservice.infrastructure.service.impl;
 
-import com.example.autenticationservice.domain.api.OtpServiceRepo;
+import com.example.autenticationservice.domain.repository.OtpServiceRepo;
 import com.example.autenticationservice.domain.model.Otp;
 import com.example.autenticationservice.infrastructure.repository.OtpRepository;
 import lombok.RequiredArgsConstructor;
