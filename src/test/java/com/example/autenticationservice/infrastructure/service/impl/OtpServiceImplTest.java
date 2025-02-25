@@ -11,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.  *;
 
 @ExtendWith(MockitoExtension.class)
 public class OtpServiceImplTest {
@@ -81,7 +81,7 @@ public class OtpServiceImplTest {
         doReturn(Optional.of(otp)).when(otpRepository).findOtpBySessionIdAndValidTrue(sessionId);
 
         //TEST
-        Optional<Otp> foundOtp =otpServiceImpl.getValidOtpBySessionId(sessionId);
+        Optional<Otp> foundOtp = otpServiceImpl.getValidOtpBySessionId(sessionId);
 
         //RESULT
         Assertions.assertTrue(foundOtp.isPresent());
@@ -99,7 +99,7 @@ public class OtpServiceImplTest {
         doReturn(Optional.empty()).when(otpRepository).findOtpBySessionIdAndValidTrue(sessionId);
 
         //TEST
-        Optional<Otp> foundOtp =otpServiceImpl.getValidOtpBySessionId(sessionId);
+        Optional<Otp> foundOtp = otpServiceImpl.getValidOtpBySessionId(sessionId);
 
         //RESULT
         Assertions.assertFalse(foundOtp.isPresent());
