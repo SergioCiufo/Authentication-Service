@@ -21,9 +21,6 @@ public class AutenticationServiceExceptionHandlerTest {
     @InjectMocks
     private AutenticationServiceExceptionHandler autenticationServiceExceptionHandler;
 
-    @Mock
-    private RefreshTokenApp refreshTokenApp;
-
     @Test
     void shouldHandleAutenticationServiceException_whenExceptionThrown() {
         //PARAMETERS
