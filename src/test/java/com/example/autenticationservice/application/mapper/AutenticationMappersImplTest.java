@@ -10,10 +10,16 @@ import com.example.autenticationservice.domain.model.verifyToken.VerifyTokenResp
 import com.example.autenticationservice.generated.application.model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+@ExtendWith(MockitoExtension.class)
 public class AutenticationMappersImplTest {
 
-    private final AutenticationMappersImpl autenticationMappersImpl = new AutenticationMappersImpl();
+    @InjectMocks
+    private AutenticationMappersImpl autenticationMappersImpl;
 
     @Test
     void shouldConvertToDomainRegisterRequest_whenAllOk(){
@@ -298,7 +304,7 @@ public class AutenticationMappersImplTest {
         //RESULTS
         Assertions.assertNotNull(result);
         Assertions.assertEquals("accessToken",result.getAccessToken());
-        Assertions.assertEquals("success",result.getAccessToken());
+        Assertions.assertEquals("success",result.getMessage());
     }
 
     @Test
@@ -343,6 +349,7 @@ public class AutenticationMappersImplTest {
     void shouldConvertFromDomainGetUsernameList200ResponseInner_whenAllOk(){
         //PARAMETERS
         GetUsernameResponse getUsernameResponse = new GetUsernameResponse();
+        getUsernameResponse.setUsername("usernameTest");
         getUsernameResponse.getUsername();
 
         //TEST
@@ -350,7 +357,7 @@ public class AutenticationMappersImplTest {
 
         //RESULTS
         Assertions.assertNotNull(result);
-        Assertions.assertEquals("success",result.getUsername());
+        Assertions.assertEquals("usernameTest",result.getUsername());
     }
 
     @Test
