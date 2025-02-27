@@ -64,7 +64,7 @@ public class UserServiceRepoImplTest {
     @Test
     void shouldThrowException_whenFailsToFindUserByUsername() { //simula un errore del database
         //MOCK
-        when(userRepository.findByUsername("testuser")).thenThrow(new RuntimeException("DB error"));
+        doThrow(RuntimeException.class).when(userRepository).findByUsername("testuser");
 
         //TEST + RESULT
         Assertions.assertThrows(RuntimeException.class, () -> userServiceRepoImpl.getUserByUsername("testuser"));
@@ -113,7 +113,7 @@ public class UserServiceRepoImplTest {
     @Test
     void shouldThrowException_whenFailsToFindUserByUsernameAndPassword() { //simula un errore del database
         //MOCK
-        when(userRepository.findByUsernameAndPassword("testuser", "password")).thenThrow(new RuntimeException("DB error"));
+        doThrow(RuntimeException.class).when(userRepository).findByUsernameAndPassword("testuser", "password");
 
         //TEST + RESULT
         Assertions.assertThrows(RuntimeException.class, () -> userServiceRepoImpl.getUserByUsernameAndPassword("testuser", "password"));
@@ -161,7 +161,7 @@ public class UserServiceRepoImplTest {
     @Test
     void shouldThrowException_whenFailsToFindAllUsers() { //simula un errore del database
         //MOCK
-        when(userRepository.findAll()).thenThrow(new RuntimeException("DB error"));
+        doThrow(RuntimeException.class).when(userRepository).findAll();
 
         // TEST + RESULT
         Assertions.assertThrows(RuntimeException.class, () -> userServiceRepoImpl.getUserList());

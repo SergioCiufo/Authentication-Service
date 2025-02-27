@@ -63,7 +63,7 @@ public class OtpServiceImplTest {
         otp.setOtp("123456");
 
         //MOCK
-        doThrow(new RuntimeException("DB error")).when(otpRepository).save(otp);
+        doThrow(RuntimeException.class).when(otpRepository).save(otp);
 
         //TEST + RESULT
         Assertions.assertThrows(RuntimeException.class, () -> otpServiceImpl.saveOtp(otp));
@@ -112,7 +112,7 @@ public class OtpServiceImplTest {
         String sessionId = "123456";
 
         //MOCK
-        doThrow(new RuntimeException("DB error")).when(otpRepository).findOtpBySessionIdAndValidTrue(sessionId);
+        doThrow(RuntimeException.class).when(otpRepository).findOtpBySessionIdAndValidTrue(sessionId);
 
         //TEST + RESULT
         Assertions.assertThrows(RuntimeException.class, () -> otpServiceImpl.getValidOtpBySessionId(sessionId));

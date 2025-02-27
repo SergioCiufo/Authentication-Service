@@ -93,7 +93,7 @@ public class RefreshTokenServiceImplTest {
         String refreshToken = "refreshToken";
 
         //MOCK
-        doThrow(new RuntimeException("DB error")).when(refreshTokenRepository).findByRefreshToken(refreshToken);
+        doThrow(RuntimeException.class).when(refreshTokenRepository).findByRefreshToken(refreshToken);
 
         //TEST + RESULTS
         Assertions.assertThrows(RuntimeException.class, () -> refreshTokenServiceImpl.getRefreshToken(refreshToken));
@@ -122,7 +122,8 @@ public class RefreshTokenServiceImplTest {
         String refreshToken = "refreshToken";
 
         //MOCK
-        doThrow(new RuntimeException("DB error")).when(refreshTokenRepository).invalidateRefreshToken(refreshToken);
+        doThrow(RuntimeException.class).when(refreshTokenRepository).invalidateRefreshToken(refreshToken);
+
 
         //TEST + RESULTS
         Assertions.assertThrows(RuntimeException.class, () -> refreshTokenServiceImpl.invalidateRefreshToken(refreshToken));
