@@ -35,12 +35,9 @@ import java.util.UUID;
 public class AutenticationServiceImpl implements AutenticationService {
 
     private final EmailService emailService;
-//    private final RefreshTokenJwt refreshTokenJwt;
-//    private final AccessTokenJwt accessTokenJwt;
     private final JwtService jwtService;
     private final UserService userService;
     private final OtpService otpService;
-//    private final RefreshTokenService refreshTokenService;
     private final TokenService tokenService;
     private final OtpUtil otpUtil;
     private final HashUtil hashUtil;

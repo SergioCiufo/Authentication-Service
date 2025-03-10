@@ -1,5 +1,6 @@
 package com.example.autenticationservice.application;
 
+import com.example.autenticationService.generated.application.model.*;
 import com.example.autenticationservice.application.mapper.AutenticationMappers;
 import com.example.autenticationservice.application.service.JwtServiceImpl;
 import com.example.autenticationservice.domain.model.GetUsernameResponse;
@@ -10,7 +11,7 @@ import com.example.autenticationservice.domain.model.verifyToken.GetAccessTokenB
 import com.example.autenticationservice.domain.model.verifyToken.GetAccessTokenByRefreshTokenResponse;
 import com.example.autenticationservice.domain.model.verifyToken.VerifyTokenResponse;
 import com.example.autenticationservice.domain.service.AutenticationService;
-import com.example.autenticationservice.generated.application.model.*;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

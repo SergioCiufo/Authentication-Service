@@ -5,13 +5,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import lombok.extern.log4j.Log4j2;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.security.Key;
-
-// TODO carino, ma è più una utility, sposta in utils e fai un sottopackage jwt
-// ricordami di farti vedere la factory dopo così possiamo farci un fiocchetto su questa cosa
 
 @Log4j2
 public abstract class TokenManager {

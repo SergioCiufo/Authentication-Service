@@ -12,8 +12,8 @@ import com.example.autenticationservice.domain.model.autentication.SecondStepLog
 import com.example.autenticationservice.domain.model.verifyToken.VerifyTokenResponse;
 import com.example.autenticationservice.domain.service.*;
 
-import com.example.autenticationservice.generated.application.api.ServizioAutenticazioneApiDelegate;
-import com.example.autenticationservice.generated.application.model.*;
+import com.example.autenticationService.generated.application.api.ServizioAutenticazioneApiDelegate;
+import com.example.autenticationService.generated.application.model.*;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;

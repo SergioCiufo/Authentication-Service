@@ -7,7 +7,7 @@ import com.example.autenticationservice.domain.model.register.StepRegisterRespon
 import com.example.autenticationservice.domain.model.verifyToken.GetAccessTokenByRefreshTokenRequest;
 import com.example.autenticationservice.domain.model.verifyToken.GetAccessTokenByRefreshTokenResponse;
 import com.example.autenticationservice.domain.model.verifyToken.VerifyTokenResponse;
-import com.example.autenticationservice.generated.application.model.*;
+import com.example.autenticationService.generated.application.model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

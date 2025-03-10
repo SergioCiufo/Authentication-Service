@@ -8,7 +8,7 @@ import com.example.autenticationservice.domain.model.verifyToken.GetAccessTokenB
 import com.example.autenticationservice.domain.model.register.StepRegisterRequest;
 import com.example.autenticationservice.domain.model.autentication.SecondStepLoginRequest;
 import com.example.autenticationservice.domain.model.verifyToken.VerifyTokenResponse;
-import com.example.autenticationservice.generated.application.model.*;
+import com.example.autenticationService.generated.application.model.*;
 import org.mapstruct.Mapper;
 
 @Mapper
