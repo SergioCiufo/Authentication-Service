@@ -55,49 +55,49 @@ public class RefreshTokenAppTest {
     }
 
 
-    @Test
-    public void shouldGetJwtFromCookie_whenAllOk() {
-        //PARAMETERS
-        String token = "token";
-        Cookie cookie = new Cookie(jwtRefreshCookie, token);
-
-        //MOCK
-        mockedWebUtils.when(() -> WebUtils.getCookie(request, jwtRefreshCookie))
-                .thenReturn(cookie);
-
-        //TEST
-        String result = refreshTokenApp.getJwtFromCookie();
-        System.out.println("Returned token: " + result);
-
-        //RESULTS
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(token, result);
-    }
-
-    @Test
-    public void shouldGetJwtFromCookieReturnNull_whenCookieNotExist() {
-        //MOCK
-        mockedWebUtils.when(() -> WebUtils.getCookie(request, jwtRefreshCookie))
-                .thenReturn(null);
-
-        //TEST
-        String result = refreshTokenApp.getJwtFromCookie();
-
-        //RESULTS
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void shouldThrowError_whenWebUtilsFails() { //simula un'eccezione quando viene chiamato WebUtils.getCookie
-        //MOCK
-        mockedWebUtils.when(() -> WebUtils.getCookie(request, jwtRefreshCookie))
-                .thenThrow(new RuntimeException("error"));
-
-        //TEST
-        Assertions.assertThrows(RuntimeException.class, () -> {
-            refreshTokenApp.getJwtFromCookie();
-        });
-    }
+//    @Test
+//    public void shouldGetJwtFromCookie_whenAllOk() {
+//        //PARAMETERS
+//        String token = "token";
+//        Cookie cookie = new Cookie(jwtRefreshCookie, token);
+//
+//        //MOCK
+//        mockedWebUtils.when(() -> WebUtils.getCookie(request, jwtRefreshCookie))
+//                .thenReturn(cookie);
+//
+//        //TEST
+//        String result = refreshTokenApp.getJwtFromCookie();
+//        System.out.println("Returned token: " + result);
+//
+//        //RESULTS
+//        Assertions.assertNotNull(result);
+//        Assertions.assertEquals(token, result);
+//    }
+//
+//    @Test
+//    public void shouldGetJwtFromCookieReturnNull_whenCookieNotExist() {
+//        //MOCK
+//        mockedWebUtils.when(() -> WebUtils.getCookie(request, jwtRefreshCookie))
+//                .thenReturn(null);
+//
+//        //TEST
+//        String result = refreshTokenApp.getJwtFromCookie();
+//
+//        //RESULTS
+//        Assertions.assertNull(result);
+//    }
+//
+//    @Test
+//    public void shouldThrowError_whenWebUtilsFails() { //simula un'eccezione quando viene chiamato WebUtils.getCookie
+//        //MOCK
+//        mockedWebUtils.when(() -> WebUtils.getCookie(request, jwtRefreshCookie))
+//                .thenThrow(new RuntimeException("error"));
+//
+//        //TEST
+//        Assertions.assertThrows(RuntimeException.class, () -> {
+//            refreshTokenApp.getJwtFromCookie();
+//        });
+//    }
 
     @Test
     public void shouldGenerateCookie_whenAllOk() {

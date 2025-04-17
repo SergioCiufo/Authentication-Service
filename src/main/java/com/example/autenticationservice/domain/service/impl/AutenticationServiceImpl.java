@@ -3,8 +3,6 @@ package com.example.autenticationservice.domain.service.impl;
 import com.example.autenticationservice.domain.api.EmailService;
 import com.example.autenticationservice.domain.api.JwtService;
 import com.example.autenticationservice.domain.exceptions.*;
-import com.example.autenticationservice.domain.util.jwt.AccessTokenJwt;
-import com.example.autenticationservice.domain.util.jwt.RefreshTokenJwt;
 import com.example.autenticationservice.domain.model.GetUsernameResponse;
 import com.example.autenticationservice.domain.model.autentication.*;
 import com.example.autenticationservice.domain.model.register.StepRegisterResponse;
@@ -189,7 +187,8 @@ public class AutenticationServiceImpl implements AutenticationService {
 
     @Override
     public GetAccessTokenByRefreshTokenResponse getNewAccessToken(GetAccessTokenByRefreshTokenRequest firstStepRequest) {
-        String refreshTokenString = jwtService.extractRefreshJwt();
+//        String refreshTokenString = jwtService.extractRefreshJwt();
+        String refreshTokenString = firstStepRequest.getRefreshToken();
 
         if(StringUtils.isBlank(refreshTokenString)){
             log.error("Missing Refresh token");
@@ -216,8 +215,9 @@ public class AutenticationServiceImpl implements AutenticationService {
     }
 
     @Override
-    public LogoutResponse logout() {
-        String refreshTokenString = jwtService.extractRefreshJwt();
+    public LogoutResponse logout(FirstStepLogoutRequest request) {
+//        String refreshTokenString = jwtService.extractRefreshJwt();
+        String refreshTokenString = request.getRefreshToken();
 
 //        if (!(refreshTokenString == null || refreshTokenString.isEmpty())) {
         if(!StringUtils.isBlank(refreshTokenString)){

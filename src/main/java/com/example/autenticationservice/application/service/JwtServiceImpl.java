@@ -21,11 +21,6 @@ public class JwtServiceImpl implements JwtService {
         return accessTokenApp.getAccessJwtFromHeader();
     }
 
-    @Override
-    public String extractRefreshJwt() {
-        return refreshTokenApp.getJwtFromCookie();
-    }
-
     public void setAuthorizationHeader(String accessToken) {
         httpServletResponse.setHeader("Authorization", "Bearer " + accessToken);
     }

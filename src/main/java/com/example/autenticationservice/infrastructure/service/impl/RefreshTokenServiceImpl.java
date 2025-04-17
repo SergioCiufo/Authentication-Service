@@ -5,6 +5,7 @@ import com.example.autenticationservice.domain.model.RefreshToken;
 import com.example.autenticationservice.infrastructure.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -24,6 +25,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenServiceRepo {
     }
 
     @Override
+    @Transactional
     public void invalidateRefreshToken(String refreshTokenString) {
         refreshTokenRepository.invalidateRefreshToken(refreshTokenString);
     }

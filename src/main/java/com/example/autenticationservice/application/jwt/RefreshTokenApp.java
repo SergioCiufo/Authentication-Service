@@ -22,15 +22,6 @@ public class RefreshTokenApp {
 
     private final HttpServletRequest request;
 
-    //Recupera il JWT dal cookie HTTP della richiesta HttpServletRequest
-    public String getJwtFromCookie() {
-        Cookie cookie = WebUtils.getCookie(request, jwtRefreshCookie);
-        if (cookie != null) {
-            return cookie.getValue();
-        }else{
-            return null;
-        }
-    }
 
     public ResponseCookie generateCookie(String token) {
         return ResponseCookie.from(jwtRefreshCookie, token)

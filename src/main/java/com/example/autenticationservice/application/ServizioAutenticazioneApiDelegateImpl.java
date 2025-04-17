@@ -90,8 +90,9 @@ public class ServizioAutenticazioneApiDelegateImpl implements ServizioAutenticaz
     }
 
     @Override
-    public ResponseEntity<Logout200Response> logout(){
-        LogoutResponse response = autenticationService.logout();
+    public ResponseEntity<Logout200Response> logout(LogoutRequest logoutRequest){
+        FirstStepLogoutRequest request = autenticationMappers.convertToDomain(logoutRequest);
+        LogoutResponse response = autenticationService.logout(request);
 
         ResponseCookie cleanRefreshCookie = jwtServiceImpl.getCleanJwtCookie();
 

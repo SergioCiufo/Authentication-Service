@@ -55,31 +55,6 @@ public class JwtServiceImplTest {
     }
 
     @Test
-    void shouldExtractRefreshToken_whenAllOk() {
-        //PARAMETERS
-        String expectedToken = "refreshToken";
-
-        //MOCK
-        doReturn(expectedToken).when(refreshTokenApp).getJwtFromCookie();
-
-        //TEST
-        String result = jwtServiceImpl.extractRefreshJwt();
-
-        //RESULTS
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(expectedToken, result);
-    }
-
-    @Test
-    void shouldThrowException_whenExtractRefreshTokenFails() {
-        //MOCK
-        doThrow(RuntimeException.class).when(refreshTokenApp).getJwtFromCookie();
-
-        //TEST + RESULT
-        Assertions.assertThrows(RuntimeException.class, () -> jwtServiceImpl.extractRefreshJwt());
-    }
-
-    @Test
     void shouldSetAuthorizzationHeader_whenAllOk() {
         //PARAMETERS
         String expectedToken = "accessToken";

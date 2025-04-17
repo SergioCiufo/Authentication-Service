@@ -14,8 +14,8 @@ tags:
 components:
   securitySchemes:
     bearerAuth:
-      description: Autenticazione tramite Bearer Token (JWT). Il token deve essere passato nell'header `Authorization` con il formato `Bearer <token>`. 
-        Usato per verificare l'identità dell'utente e autorizzare l'accesso alle risorse protette. 
+      description: Autenticazione tramite Bearer Token (JWT). Il token deve essere passato nell'header `Authorization` con il formato `Bearer <token>`.
+        Usato per verificare l'identità dell'utente e autorizzare l'accesso alle risorse protette.
         Il token scade dopo un certo periodo, per rinnovarlo usa il refresh token.
       type: http
       scheme: bearer
@@ -199,15 +199,23 @@ paths:
         '401':
           description: Accesso non autorizzato, token mancante o non valido
 
-  /logout:
+  /logoutUser:
     post:
       tags:
         - Servizio Autenticazione
       summary: Logout dell'utente
       description: Invalida l'access token e il refresh token, disconnettendo l'utente dal sistema.
       operationId: logout
-      security: #Richiamiamo il bearerAuth del component security
-        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+                  example: "refreshTokenPerIlLogout"
       responses:
         '200':
           description: Logout eseguito con successo, token invalidato

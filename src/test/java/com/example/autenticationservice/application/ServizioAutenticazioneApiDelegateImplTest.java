@@ -383,17 +383,20 @@ public class ServizioAutenticazioneApiDelegateImplTest {
     @Test
     void shouldLogout_whenAllOk(){
         //PARAMETERS
+        FirstStepLogoutRequest request = new FirstStepLogoutRequest();
+        LogoutRequest logoutRequest = new LogoutRequest();
         LogoutResponse response = new LogoutResponse();
-        ResponseCookie cleanRefreshCookie = ResponseCookie.from("token", "").build();
         Logout200Response convertedResponse = new Logout200Response();
+        ResponseCookie mockCookie = ResponseCookie.from("refreshToken", "").build();
 
         //MOCK
-        doReturn(response).when(autenticationService).logout();
-        doReturn(cleanRefreshCookie).when(jwtServiceImpl).getCleanJwtCookie();
+        doReturn(request).when(autenticationMappers).convertToDomain(logoutRequest);
+        doReturn(response).when(autenticationService).logout(request);
         doReturn(convertedResponse).when(autenticationMappers).convertFromDomain(response);
+        doReturn(mockCookie).when(jwtServiceImpl).getCleanJwtCookie();
 
         //TEST
-        ResponseEntity<Logout200Response> result = servizioAutenticazioneApiDelegateImpl.logout();
+        ResponseEntity<Logout200Response> result = servizioAutenticazioneApiDelegateImpl.logout(logoutRequest);
 
         //VERIFY
         Assertions.assertNotNull(result);
@@ -401,56 +404,78 @@ public class ServizioAutenticazioneApiDelegateImplTest {
         Assertions.assertEquals(convertedResponse, result.getBody());
 
         Assertions.assertTrue(result.getHeaders().containsKey(HttpHeaders.SET_COOKIE));
-        Assertions.assertEquals(cleanRefreshCookie.toString(), result.getHeaders().getFirst(HttpHeaders.SET_COOKIE));
+        Assertions.assertEquals(mockCookie.toString(), result.getHeaders().getFirst(HttpHeaders.SET_COOKIE));
         Assertions.assertEquals("", result.getHeaders().getFirst(HttpHeaders.AUTHORIZATION));
 
+        verify(autenticationMappers).convertToDomain(logoutRequest);
         verify(autenticationMappers).convertFromDomain(response);
-        verify(autenticationService).logout();
+        verify(autenticationService).logout(request);
         verify(jwtServiceImpl).getCleanJwtCookie();
     }
 
     @Test
     void shouldThrowException_whenLogoutFails() {
+        FirstStepLogoutRequest request = new FirstStepLogoutRequest();
+        LogoutRequest logoutRequest = new LogoutRequest();
+
         //MOCK
-        doThrow(RuntimeException.class).when(autenticationService).logout();
+        doReturn(request).when(autenticationMappers).convertToDomain(logoutRequest);
+        doThrow(new RuntimeException("Logout failed")).when(autenticationService).logout(request);
 
         //TEST + RESULTS
-        Assertions.assertThrows(RuntimeException.class, () -> servizioAutenticazioneApiDelegateImpl.logout());
+        Assertions.assertThrows(RuntimeException.class,
+                () -> servizioAutenticazioneApiDelegateImpl.logout(logoutRequest),
+                "Expected logout to throw RuntimeException");
 
-        verify(autenticationService).logout();
+        verify(autenticationMappers).convertToDomain(logoutRequest);
+        verify(autenticationService).logout(request);
     }
+
+
 
     @Test
     void shouldThrowException_whenLogoutJwtCookieFails() {
         //PARAMETERS
+        LogoutRequest logoutRequest = new LogoutRequest();
+        FirstStepLogoutRequest request = new FirstStepLogoutRequest();
         LogoutResponse response = new LogoutResponse();
 
         //MOCK
-        doReturn(response).when(autenticationService).logout();
+        doReturn(request).when(autenticationMappers).convertToDomain(logoutRequest);
+        doReturn(response).when(autenticationService).logout(request);
         doThrow(RuntimeException.class).when(jwtServiceImpl).getCleanJwtCookie();
 
         //TEST + RESULTS
-        Assertions.assertThrows(RuntimeException.class, () -> servizioAutenticazioneApiDelegateImpl.logout());
+        Assertions.assertThrows(RuntimeException.class,
+                () -> servizioAutenticazioneApiDelegateImpl.logout(logoutRequest));
 
-        verify(autenticationService).logout();
+        verify(autenticationMappers).convertToDomain(logoutRequest);
+        verify(autenticationService).logout(request);
         verify(jwtServiceImpl).getCleanJwtCookie();
     }
 
     @Test
     void shouldThrowException_whenLogoutResponseConversionFails() {
         //PARAMETERS
+        LogoutRequest logoutRequest = new LogoutRequest();
+        FirstStepLogoutRequest domainRequest = new FirstStepLogoutRequest();
         LogoutResponse response = new LogoutResponse();
         ResponseCookie cleanRefreshCookie = ResponseCookie.from("token", "").build();
 
         //MOCK
-        doReturn(response).when(autenticationService).logout();
+        doReturn(domainRequest).when(autenticationMappers).convertToDomain(logoutRequest);
+        doReturn(response).when(autenticationService).logout(domainRequest);
         doReturn(cleanRefreshCookie).when(jwtServiceImpl).getCleanJwtCookie();
-        doThrow(RuntimeException.class).when(autenticationMappers).convertFromDomain(response);
+        doThrow(RuntimeException.class)
+                .when(autenticationMappers).convertFromDomain(response);
 
-        //TEST + RESULTS
-        Assertions.assertThrows(RuntimeException.class, () -> servizioAutenticazioneApiDelegateImpl.logout());
+        //TEST + VERIFY
+        Assertions.assertThrows(RuntimeException.class,
+                () -> servizioAutenticazioneApiDelegateImpl.logout(logoutRequest));
 
-        verify(autenticationService).logout();
+
+        verify(autenticationMappers).convertToDomain(logoutRequest);
+        verify(autenticationService).logout(domainRequest);
         verify(jwtServiceImpl).getCleanJwtCookie();
         verify(autenticationMappers).convertFromDomain(response);
     }

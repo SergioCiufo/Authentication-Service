@@ -40,6 +40,7 @@ public interface AutenticationMappers {
     RefreshToken200Response convertFromDomain(GetAccessTokenByRefreshTokenResponse getAccessTokenByRefreshTokenResponse);
 
     //LOGOUT
+    FirstStepLogoutRequest convertToDomain(LogoutRequest logoutRequest);
     Logout200Response convertFromDomain(LogoutResponse response);
 
     //GET USERNAME LIST

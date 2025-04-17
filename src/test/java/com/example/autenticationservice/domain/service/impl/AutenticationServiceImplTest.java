@@ -611,7 +611,6 @@ public class AutenticationServiceImplTest {
         String accessToken = "accessTokenTest";
 
         //MOCK
-        doReturn(refreshTokenString).when(jwtService).extractRefreshJwt();
         try (MockedStatic<StringUtils> mockedStringUtils = mockStatic(StringUtils.class)) {
             mockedStringUtils.when(() -> StringUtils.isBlank(refreshTokenString)).thenReturn(false);
             doReturn(refreshToken).when(tokenService).getRefreshToken(refreshTokenString);
@@ -638,7 +637,6 @@ public class AutenticationServiceImplTest {
         String refreshTokenString = "refreshTokenTest";
 
         //MOCK
-        doReturn(refreshTokenString).when(jwtService).extractRefreshJwt();
         try (MockedStatic<StringUtils> mockedStringUtils = mockStatic(StringUtils.class)) {
             mockedStringUtils.when(() -> StringUtils.isBlank(refreshTokenString)).thenReturn(true);
 
@@ -672,7 +670,6 @@ public class AutenticationServiceImplTest {
                 .build();
 
         //MOCK
-        doReturn(refreshTokenString).when(jwtService).extractRefreshJwt();
         try (MockedStatic<StringUtils> mockedStringUtils = mockStatic(StringUtils.class)) {
             mockedStringUtils.when(() -> StringUtils.isBlank(refreshTokenString)).thenReturn(false);
             doReturn(refreshToken).when(tokenService).getRefreshToken(refreshTokenString);
@@ -683,52 +680,9 @@ public class AutenticationServiceImplTest {
                 autenticationServiceImpl.getNewAccessToken(getAccessTokenByRefreshTokenRequest);
             });
 
-            verify(jwtService, times(1)).extractRefreshJwt();
             verify(tokenService, times(1)).getRefreshToken(refreshTokenString);
             verify(tokenService, times(1)).validateRefreshToken(refreshTokenString);
             mockedStringUtils.verify(() -> StringUtils.isBlank(refreshTokenString), times(1));
-        }
-    }
-
-    @Test
-    public void shouldLogoutResponse_whenRefreshTokenDoesNotExist() {
-        //PARAMETERS
-        String refreshTokenString = "";
-
-        //MOCK
-        doReturn(refreshTokenString).when(jwtService).extractRefreshJwt();
-        try (MockedStatic<StringUtils> mockedStringUtils = mockStatic(StringUtils.class)) {
-            mockedStringUtils.when(() -> StringUtils.isBlank(refreshTokenString)).thenReturn(true);
-
-            //TEST
-            LogoutResponse logoutResponse = autenticationServiceImpl.logout();
-
-            //RESULTS
-            Assertions.assertNotNull(logoutResponse);
-            verify(jwtService, times(1)).extractRefreshJwt();
-            mockedStringUtils.verify(() -> StringUtils.isBlank(refreshTokenString), times(1));
-        }
-    }
-
-    @Test
-    public void shouldLogoutResponse_whenRefreshTokenExists() {
-        //PARAMETERS
-        String refreshTokenString = "refreshTokenTest";
-
-        //MOCK
-        doReturn(refreshTokenString).when(jwtService).extractRefreshJwt();
-        try (MockedStatic<StringUtils> mockedStringUtils = mockStatic(StringUtils.class)) {
-            mockedStringUtils.when(() -> StringUtils.isBlank(refreshTokenString)).thenReturn(false);
-            doNothing().when(tokenService).invalidateRefreshToken(refreshTokenString);
-
-            //TEST
-            LogoutResponse logoutResponse = autenticationServiceImpl.logout();
-
-            //RESULTS
-            Assertions.assertNotNull(logoutResponse);
-            verify(jwtService, times(1)).extractRefreshJwt();
-            mockedStringUtils.verify(() -> StringUtils.isBlank(refreshTokenString), times(1));
-            verify(tokenService, times(1)).invalidateRefreshToken(refreshTokenString);
         }
     }
 
@@ -778,6 +732,68 @@ public class AutenticationServiceImplTest {
         verify(userService, times(1)).getUserList();
     }
 
+    @Test
+    public void shouldLogoutAndInvalidateToken_whenRefreshTokenExists() {
+        //PARAMETERS
+        String refreshToken = "valid.refresh.token";
+        FirstStepLogoutRequest request = FirstStepLogoutRequest.builder()
+                .refreshToken(refreshToken)
+                .build();
 
+        LogoutResponse expectedResponse = LogoutResponse.builder()
+                .message("Logout successful. Tokens invalidated.")
+                .build();
+
+        //MOCK
+        doNothing().when(tokenService).invalidateRefreshToken(refreshToken);
+
+        //TEST
+        LogoutResponse result = autenticationServiceImpl.logout(request);
+
+        //RESULTS
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(expectedResponse.getMessage(), result.getMessage());
+        verify(tokenService, times(1)).invalidateRefreshToken(refreshToken);
+    }
+
+    @Test
+    public void shouldLogoutWithoutInvalidating_whenRefreshTokenIsBlank() {
+        //PARAMETERS
+        FirstStepLogoutRequest request = FirstStepLogoutRequest.builder()
+                .refreshToken("")
+                .build();
+
+        LogoutResponse expectedResponse = LogoutResponse.builder()
+                .message("Logout successful. Tokens invalidated.")
+                .build();
+
+        //TEST
+        LogoutResponse result = autenticationServiceImpl.logout(request);
+
+        //RESULTS
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(expectedResponse.getMessage(), result.getMessage());
+        verify(tokenService, never()).invalidateRefreshToken(any());
+    }
+
+    @Test
+    public void shouldLogoutWithoutInvalidating_whenRefreshTokenIsNull() {
+        //PARAMETERS
+        FirstStepLogoutRequest request = FirstStepLogoutRequest.builder()
+                .refreshToken(null)
+                .build();
+
+        LogoutResponse expectedResponse = LogoutResponse.builder()
+                .message("Logout successful. Tokens invalidated.")
+                .build();
+
+        //TEST
+        LogoutResponse result = autenticationServiceImpl.logout(request);
+
+        //RESULTS
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(expectedResponse.getMessage(), result.getMessage());
+        verify(tokenService, never()).invalidateRefreshToken(any());
+    }
 
 }

@@ -18,7 +18,7 @@ public interface AutenticationService {
     public ResendOtpResponse resendOtp(ResendOtpRequest request);
     public VerifyTokenResponse verifyToken();
     public GetAccessTokenByRefreshTokenResponse getNewAccessToken(GetAccessTokenByRefreshTokenRequest request);
-    public LogoutResponse logout();
+    public LogoutResponse logout(FirstStepLogoutRequest request);
     public List<GetUsernameResponse> getUsername();
 
 }
